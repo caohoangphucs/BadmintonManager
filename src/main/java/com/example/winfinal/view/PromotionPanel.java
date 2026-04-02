@@ -1,0 +1,158 @@
+package com.example.winfinal.view;
+
+import com.example.winfinal.controller.PromotionController;
+import com.example.winfinal.dto.PromotionDTO;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+public class PromotionPanel extends JPanel {
+    private final PromotionController promotionController;
+    private JTable table;
+    private DefaultTableModel tableModel;
+
+    public PromotionPanel() {
+        this.promotionController = new PromotionController();
+        setLayout(new BorderLayout(10, 10));
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setBackground(Color.WHITE);
+
+        initComponents();
+        loadData();
+    }
+
+    private void initComponents() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(Color.WHITE);
+        
+        JLabel header = new JLabel("Quản lý chương trình khuyến mãi");
+        header.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        headerPanel.add(header, BorderLayout.WEST);
+
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        actions.setBackground(Color.WHITE);
+        JButton btnAdd = createButton("Thêm khuyến mãi", new Color(46, 204, 113));
+        JButton btnEdit = createButton("Sửa", new Color(241, 196, 15));
+        JButton btnDelete = createButton("Xóa", new Color(231, 76, 60));
+        JButton btnRefresh = createButton("Làm mới", new Color(52, 152, 219));
+
+        btnAdd.addActionListener(e -> showAddDialog());
+        btnEdit.addActionListener(e -> showEditDialog());
+        btnDelete.addActionListener(e -> deleteSelected());
+        btnRefresh.addActionListener(e -> loadData());
+
+        actions.add(btnAdd);
+        actions.add(btnEdit);
+        actions.add(btnDelete);
+        actions.add(btnRefresh);
+        headerPanel.add(actions, BorderLayout.EAST);
+
+        add(headerPanel, BorderLayout.NORTH);
+
+        String[] cols = {"ID", "Tên chương trình", "% Giảm giá", "Ngày bắt đầu", "Ngày kết thúc"};
+        tableModel = new DefaultTableModel(cols, 0) {
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+        table = new JTable(tableModel);
+        table.setRowHeight(30);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        add(new JScrollPane(table), BorderLayout.CENTER);
+    }
+
+    private JButton createButton(String text, Color color) {
+        JButton b = new JButton(text);
+        b.setBackground(color);
+        b.setForeground(Color.WHITE);
+        b.setFocusPainted(false);
+        b.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return b;
+    }
+
+    private void loadData() {
+        tableModel.setRowCount(0);
+        List<PromotionDTO> list = promotionController.getAll();
+        for (PromotionDTO p : list) {
+            tableModel.addRow(new Object[]{
+                p.getPromoId(), 
+                p.getPromoName(), 
+                p.getDiscountPercentage(), 
+                p.getStartDate(), 
+                p.getEndDate()
+            });
+        }
+    }
+
+    private void showAddDialog() {
+        JTextField name = new JTextField();
+        JTextField discount = new JTextField();
+        JTextField start = new JTextField(LocalDate.now().toString());
+        JTextField end = new JTextField(LocalDate.now().plusMonths(1).toString());
+
+        Object[] message = { 
+            "Tên khuyến mãi:", name, 
+            "Giảm giá (%):", discount, 
+            "Ngày bắt đầu (yyyy-mm-dd):", start, 
+            "Ngày kết thúc (yyyy-mm-dd):", end 
+        };
+        int option = JOptionPane.showConfirmDialog(this, message, "Thêm khuyến mãi mới", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            try {
+                promotionController.add(PromotionDTO.builder()
+                    .promoName(name.getText())
+                    .discountPercentage(new BigDecimal(discount.getText()))
+                    .startDate(LocalDate.parse(start.getText()))
+                    .endDate(LocalDate.parse(end.getText()))
+                    .build());
+                loadData();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi định dạng: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void showEditDialog() {
+        int row = table.getSelectedRow();
+        if (row == -1) return;
+        Integer id = (Integer) table.getValueAt(row, 0);
+        PromotionDTO p = promotionController.getById(id);
+
+        JTextField name = new JTextField(p.getPromoName());
+        JTextField discount = new JTextField(p.getDiscountPercentage().toString());
+        JTextField start = new JTextField(p.getStartDate().toString());
+        JTextField end = new JTextField(p.getEndDate().toString());
+
+        Object[] message = { 
+            "Tên khuyến mãi:", name, 
+            "Giảm giá (%):", discount, 
+            "Ngày bắt đầu (yyyy-mm-dd):", start, 
+            "Ngày kết thúc (yyyy-mm-dd):", end 
+        };
+        int option = JOptionPane.showConfirmDialog(this, message, "Cập nhật khuyến mãi", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            try {
+                p.setPromoName(name.getText());
+                p.setDiscountPercentage(new BigDecimal(discount.getText()));
+                p.setStartDate(LocalDate.parse(start.getText()));
+                p.setEndDate(LocalDate.parse(end.getText()));
+                promotionController.update(p);
+                loadData();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi định dạng: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void deleteSelected() {
+        int row = table.getSelectedRow();
+        if (row == -1) return;
+        if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa khuyến mãi này?") == JOptionPane.YES_OPTION) {
+            promotionController.delete((Integer) table.getValueAt(row, 0));
+            loadData();
+        }
+    }
+}

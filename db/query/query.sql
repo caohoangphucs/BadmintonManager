@@ -96,8 +96,8 @@ SELECT
     END AS 'Giai đoạn'
 FROM Booking
 WHERE status = 'Confirmed'
-GROUP BY HOUR(start_time)
-ORDER BY 'Số lượt đặt' DESC;
+GROUP BY HOUR(start_time), 3
+ORDER BY 2 DESC;
 
 -- 8. Thống kê thuê thiết bị (Popular Equipment)
 SELECT 

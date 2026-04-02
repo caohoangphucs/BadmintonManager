@@ -10,25 +10,37 @@ public class ReportDAO {
      */
     @SuppressWarnings("unchecked")
     public List<Object[]> getMonthlyRevenueReport() {
-        String sql = "SELECT " +
-                     "    DATE_FORMAT(b.booking_date, '%Y-%m') AS 'Month',\n" +
-                     "    SUM(b.total_price) AS 'CourtRevenue',\n" +
-                     "    IFNULL((SELECT SUM(er.rental_price * er.quantity) \n" +
-                     "            FROM Equipment_Rental er \n" +
-                     "            JOIN Booking b2 ON er.booking_id = b2.booking_id \n" +
-                     "            WHERE DATE_FORMAT(b2.booking_date, '%Y-%m') = DATE_FORMAT(b.booking_date, '%Y-%m')), 0) AS 'EquipRevenue',\n" +
-                     "    IFNULL((SELECT SUM(si.price) \n" +
-                     "            FROM Service_Invoice si \n" +
-                     "            JOIN Booking b3 ON si.booking_id = b3.booking_id \n" +
-                     "            WHERE DATE_FORMAT(b3.booking_date, '%Y-%m') = DATE_FORMAT(b.booking_date, '%Y-%m')), 0) AS 'ServiceRevenue',\n" +
-                     "    (SUM(b.total_price) + \n" +
-                     "     IFNULL((SELECT SUM(er.rental_price * er.quantity) FROM Equipment_Rental er JOIN Booking b2 ON er.booking_id = b2.booking_id WHERE DATE_FORMAT(b2.booking_date, '%Y-%m') = DATE_FORMAT(b.booking_date, '%Y-%m')), 0) + \n" +
-                     "     IFNULL((SELECT SUM(si.price) FROM Service_Invoice si JOIN Booking b3 ON si.booking_id = b3.booking_id WHERE DATE_FORMAT(b3.booking_date, '%Y-%m') = DATE_FORMAT(b.booking_date, '%Y-%m')), 0)\n" +
-                     "    ) AS 'TotalRevenue'\n" +
-                     "FROM Booking b\n" +
-                     "WHERE b.status = 'Confirmed'\n" +
-                     "GROUP BY DATE_FORMAT(b.booking_date, '%Y-%m')\n" +
-                     "ORDER BY 1 DESC";
+        String sql = "SELECT \n" +
+                     "    MonthData.Month AS 'Tháng',\n" +
+                     "    MonthData.CourtRevenue AS 'Doanh thu sân',\n" +
+                     "    IFNULL(EquipData.EquipRevenue, 0) AS 'Doanh thu phụ kiện',\n" +
+                     "    IFNULL(ServiceData.ServiceRevenue, 0) AS 'Doanh thu dịch vụ',\n" +
+                     "    (MonthData.CourtRevenue + IFNULL(EquipData.EquipRevenue, 0) + IFNULL(ServiceData.ServiceRevenue, 0)) AS 'Tổng doanh thu'\n" +
+                     "FROM (\n" +
+                     "    SELECT \n" +
+                     "        DATE_FORMAT(booking_date, '%Y-%m') AS Month,\n" +
+                     "        SUM(total_price) AS CourtRevenue\n" +
+                     "    FROM Booking\n" +
+                     "    WHERE status = 'Confirmed'\n" +
+                     "    GROUP BY Month\n" +
+                     ") AS MonthData\n" +
+                     "LEFT JOIN (\n" +
+                     "    SELECT \n" +
+                     "        DATE_FORMAT(b2.booking_date, '%Y-%m') AS Month,\n" +
+                     "        SUM(er.rental_price * er.quantity) AS EquipRevenue\n" +
+                     "    FROM Equipment_Rental er\n" +
+                     "    JOIN Booking b2 ON er.booking_id = b2.booking_id\n" +
+                     "    GROUP BY Month\n" +
+                     ") AS EquipData ON MonthData.Month = EquipData.Month\n" +
+                     "LEFT JOIN (\n" +
+                     "    SELECT \n" +
+                     "        DATE_FORMAT(b3.booking_date, '%Y-%m') AS Month,\n" +
+                     "        SUM(si.price) AS ServiceRevenue\n" +
+                     "    FROM Service_Invoice si\n" +
+                     "    JOIN Booking b3 ON si.booking_id = b3.booking_id\n" +
+                     "    GROUP BY Month\n" +
+                     ") AS ServiceData ON MonthData.Month = ServiceData.Month\n" +
+                     "ORDER BY MonthData.Month DESC";
         
         try (EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager()) {
             return em.createNativeQuery(sql).getResultList();
@@ -41,10 +53,10 @@ public class ReportDAO {
     @SuppressWarnings("unchecked")
     public List<Object[]> getMonthlyGrowthReport() {
         String sql = "SELECT \n" +
-                     "    MonthYear,\n" +
-                     "    TotalRevenue,\n" +
-                     "    LAG(TotalRevenue) OVER (ORDER BY MonthYear) AS 'LastMonthRevenue',\n" +
-                     "    ROUND(((TotalRevenue - LAG(TotalRevenue) OVER (ORDER BY MonthYear)) / LAG(TotalRevenue) OVER (ORDER BY MonthYear)) * 100, 2) AS 'GrowthPercent'\n" +
+                     "    MonthYear AS 'Tháng',\n" +
+                     "    TotalRevenue AS 'Doanh thu',\n" +
+                     "    LAG(TotalRevenue) OVER (ORDER BY MonthYear) AS 'Tháng trước',\n" +
+                     "    ROUND(((TotalRevenue - LAG(TotalRevenue) OVER (ORDER BY MonthYear)) / LAG(TotalRevenue) OVER (ORDER BY MonthYear)) * 100, 2) AS '% Tăng trưởng'\n" +
                      "FROM (\n" +
                      "    SELECT DATE_FORMAT(booking_date, '%Y-%m') AS MonthYear, SUM(total_price) AS TotalRevenue\n" +
                      "    FROM Booking WHERE status = 'Confirmed'\n" +
@@ -62,9 +74,9 @@ public class ReportDAO {
     @SuppressWarnings("unchecked")
     public List<Object[]> getTop5Customers() {
         String sql = "SELECT \n" +
-                     "    c.customer_id, c.full_name, c.membership_type,\n" +
-                     "    COUNT(b.booking_id) AS 'BookingCount',\n" +
-                     "    SUM(p.amount) AS 'TotalSpending'\n" +
+                     "    c.customer_id, c.full_name AS 'Khách hàng', c.membership_type AS 'Hạng TV',\n" +
+                     "    COUNT(b.booking_id) AS 'Số lượt đặt',\n" +
+                     "    SUM(p.amount) AS 'Tổng chi tiêu'\n" +
                      "FROM Customer c\n" +
                      "JOIN Booking b ON c.customer_id = b.customer_id\n" +
                      "JOIN Payment p ON b.booking_id = p.booking_id\n" +
@@ -84,10 +96,10 @@ public class ReportDAO {
     @SuppressWarnings("unchecked")
     public List<Object[]> getCourtUtilizationReport() {
         String sql = "SELECT \n" +
-                     "    c.court_name, c.court_type,\n" +
-                     "    SUM(TIME_TO_SEC(TIMEDIFF(b.end_time, b.start_time)) / 3600) AS 'TotalHours',\n" +
-                     "    (COUNT(DISTINCT b.booking_date) * 16) AS 'OpenHours',\n" +
-                     "    ROUND((SUM(TIME_TO_SEC(TIMEDIFF(b.end_time, b.start_time)) / 3600) / (COUNT(DISTINCT b.booking_date) * 16)) * 100, 2) AS 'UtilizationPercent'\n" +
+                     "    c.court_name AS 'Sân', c.court_type AS 'Loại sân',\n" +
+                     "    SUM(TIME_TO_SEC(TIMEDIFF(b.end_time, b.start_time)) / 3600) AS 'Tổng giờ đặt',\n" +
+                     "    (COUNT(DISTINCT b.booking_date) * 16) AS 'Tổng giờ mở',\n" +
+                     "    ROUND((SUM(TIME_TO_SEC(TIMEDIFF(b.end_time, b.start_time)) / 3600) / (COUNT(DISTINCT b.booking_date) * 16)) * 100, 2) AS '% Hiệu suất'\n" +
                      "FROM Court c\n" +
                      "LEFT JOIN Booking b ON c.court_id = b.court_id\n" +
                      "WHERE b.status = 'Confirmed'\n" +
@@ -105,18 +117,18 @@ public class ReportDAO {
     @SuppressWarnings("unchecked")
     public List<Object[]> getPeakHoursAnalysis() {
         String sql = "SELECT \n" +
-                     "    HOUR(start_time) AS 'Hour',\n" +
-                     "    COUNT(*) AS 'BookingCount',\n" +
+                     "    HOUR(start_time) AS 'Giờ',\n" +
+                     "    COUNT(*) AS 'Số lượt đặt',\n" +
                      "    CASE \n" +
-                     "        WHEN HOUR(start_time) BETWEEN 6 AND 10 THEN 'Morning'\n" +
-                     "        WHEN HOUR(start_time) BETWEEN 11 AND 14 THEN 'Noon'\n" +
-                     "        WHEN HOUR(start_time) BETWEEN 15 AND 17 THEN 'Afternoon'\n" +
-                     "        WHEN HOUR(start_time) BETWEEN 18 AND 22 THEN 'Evening (Peak)'\n" +
-                     "        ELSE 'Other'\n" +
-                     "    END AS 'Period'\n" +
-                     "FROM Booking\n" +
+                     "        WHEN HOUR(start_time) BETWEEN 6 AND 10 THEN 'Sáng sớm'\n" +
+                     "        WHEN HOUR(start_time) BETWEEN 11 AND 14 THEN 'Trưa'\n" +
+                     "        WHEN HOUR(start_time) BETWEEN 15 AND 17 THEN 'Chiều'\n" +
+                     "        WHEN HOUR(start_time) BETWEEN 18 AND 22 THEN 'Tối (Cao điểm)'\n" +
+                     "        ELSE 'Khác'\n" +
+                     "    END AS 'Giai đoạn'\n" +
+                     "FROM Booking \n" +
                      "WHERE status = 'Confirmed'\n" +
-                     "GROUP BY HOUR(start_time)\n" +
+                     "GROUP BY HOUR(start_time), 3\n" +
                      "ORDER BY 2 DESC";
         
         try (EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager()) {
@@ -177,7 +189,7 @@ public class ReportDAO {
                      "    GROUP_CONCAT(f.comment SEPARATOR ' | ') AS 'Comments'\n" +
                      "FROM Court c\n" +
                      "JOIN Booking b ON c.court_id = b.court_id\n" +
-                     "JOIN Feedback f ON b.booking_id = f.feedback_id\n" +
+                     "JOIN Feedback f ON b.booking_id = f.booking_id\n" +
                      "GROUP BY c.court_id, c.court_name\n" +
                      "ORDER BY 2 DESC";
         

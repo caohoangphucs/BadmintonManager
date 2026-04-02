@@ -1,4 +1,5 @@
 -- Expanded Seed data for BadmintonManager
+SET NAMES utf8mb4;
 
 -- Clear existing data
 SET FOREIGN_KEY_CHECKS = 0;

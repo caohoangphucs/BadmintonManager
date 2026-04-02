@@ -1,10 +1,10 @@
 services:
   db:
     image: mysql:8.3.0
-    container_name: win_final_db
+    container_name: badminton
     restart: always
     environment:
-      MYSQL_DATABASE: agri_chain
+      MYSQL_DATABASE: badminton
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_USER: user
       MYSQL_PASSWORD: password

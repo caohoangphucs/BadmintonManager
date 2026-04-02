@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+
 CREATE TABLE `Court` (
   `court_id` int PRIMARY KEY AUTO_INCREMENT,
   `court_name` varchar(50),
@@ -85,8 +87,9 @@ CREATE TABLE `Promotion` (
 CREATE TABLE `Booking_Promotion` (
   `booking_id` int,
   `promo_id` int,
-  `PRIMARY` KEY(booking_id,promo_id)
+  PRIMARY KEY (`booking_id`, `promo_id`)
 );
+
 
 ALTER TABLE `Booking` ADD FOREIGN KEY (`customer_id`) REFERENCES `Customer` (`customer_id`);
 

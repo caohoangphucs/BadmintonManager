@@ -43,7 +43,7 @@ public class Booking {
     @Column(length = 20)
     private String status;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "Booking_Promotion",
         joinColumns = @JoinColumn(name = "booking_id"),
