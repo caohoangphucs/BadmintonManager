@@ -20,8 +20,8 @@ public class ModernTable extends JTable {
         setShowHorizontalLines(true);
         setGridColor(new Color(235, 235, 235));
         setIntercellSpacing(new Dimension(0, 0));
-        setSelectionBackground(new Color(52, 152, 219).brighter()); // Selection color
-        setSelectionForeground(Color.WHITE);
+        setSelectionBackground(new Color(228, 240, 250)); // Softer muted sky blue highlight
+        setSelectionForeground(new Color(25, 60, 95));    // High contrast readable text
         setFont(new Font("Segoe UI", Font.PLAIN, 14));
         setFillsViewportHeight(true);
         adjustColumnWidths();
@@ -71,9 +71,18 @@ public class ModernTable extends JTable {
     }
 
     @Override
+    public boolean isCellEditable(int row, int column) {
+        return false;
+    }
+
+    @Override
     public Component prepareRenderer(javax.swing.table.TableCellRenderer renderer, int row, int column) {
         Component comp = super.prepareRenderer(renderer, row, column);
-        if (!isRowSelected(row)) {
+        
+        if (isRowSelected(row)) {
+            comp.setBackground(new Color(228, 240, 250)); 
+            comp.setForeground(new Color(25, 60, 95));    
+        } else {
             if (row == hoveredRow) {
                 comp.setBackground(new Color(240, 244, 250)); // Hover color
             } else if (row % 2 == 0) {
@@ -86,7 +95,15 @@ public class ModernTable extends JTable {
         
         if (comp instanceof JLabel) {
             JLabel label = (JLabel) comp;
-            label.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15)); // Padding
+            // Pad and add accent border
+            if (isRowSelected(row) && column == 0) {
+                label.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 4, 0, 0, new Color(52, 152, 219)), 
+                    BorderFactory.createEmptyBorder(0, 11, 0, 15)
+                ));
+            } else {
+                label.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15)); // Padding
+            }
             
             String colName = getColumnName(column).toLowerCase();
             if (colName.equals("id") || colName.contains("mã id")) {

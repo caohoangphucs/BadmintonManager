@@ -38,7 +38,11 @@ public class CustomerPanel extends JPanel {
         addBtn.addActionListener(e -> showForm(null));
         editBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (row != -1) showForm(customerController.getById((Integer) table.getValueAt(row, 0)));
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng để sửa.");
+                return;
+            }
+            showForm(customerController.getById((Integer) table.getValueAt(row, 0)));
         });
         delBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
@@ -76,9 +80,22 @@ public class CustomerPanel extends JPanel {
 
     private void loadData() {
         tableModel.setRowCount(0);
-        customerController.getAll().forEach(c -> 
-            tableModel.addRow(new Object[]{c.getCustomerId(), c.getFullName(), c.getPhoneNumber(), c.getEmail(), c.getMembershipType()})
-        );
+        customerController.getAll().forEach(c -> {
+            String tier = c.getMembershipType();
+            String tierHTML = tier;
+            if (tier != null) {
+                if (tier.equalsIgnoreCase("VIP") || tier.equalsIgnoreCase("Gold") || tier.contains("Gold")) {
+                    tierHTML = "<html><font color='#d4ac0d'><b>  " + tier + "  </b></font></html>"; 
+                } else if (tier.equalsIgnoreCase("Thân thiết") || tier.equalsIgnoreCase("Silver") || tier.contains("Silver")) {
+                    tierHTML = "<html><font color='#7f8c8d'><b>  " + tier + "  </b></font></html>"; 
+                } else if (tier.equalsIgnoreCase("Thường") || tier.equalsIgnoreCase("Regular") || tier.contains("Regular")) {
+                    tierHTML = "<html><font color='#2980b9'><b>  " + tier + "  </b></font></html>"; 
+                } else {
+                    tierHTML = "<html><font color='#34495e'><b>  " + tier + "  </b></font></html>";
+                }
+            }
+            tableModel.addRow(new Object[]{c.getCustomerId(), c.getFullName(), c.getPhoneNumber(), c.getEmail(), tierHTML});
+        });
     }
 
     private void showForm(CustomerDTO customer) {

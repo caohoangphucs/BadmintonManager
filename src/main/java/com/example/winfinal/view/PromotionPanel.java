@@ -117,7 +117,10 @@ public class PromotionPanel extends JPanel {
 
     private void showEditDialog() {
         int row = table.getSelectedRow();
-        if (row == -1) return;
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng để sửa.");
+            return;
+        }
         Integer id = (Integer) table.getValueAt(row, 0);
         PromotionDTO p = promotionController.getById(id);
 

@@ -87,8 +87,8 @@ public class DashboardPanel extends JPanel {
         reportTabs = new JTabbedPane();
         reportTabs.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-        addReportTab("Doanh thu hàng tháng", new String[]{"Tháng", "Doanh thu sân", "Phụ kiện", "Dịch vụ", "Tổng cộng"});
-        addReportTab("Top khách hàng", new String[]{"ID", "Khách hàng", "Hạng TV", "Lượt đặt", "Tổng chi tiêu"});
+        addReportTab("Doanh thu hàng tháng", new String[]{"Tháng", "Doanh thu sân (VND)", "Phụ kiện (VND)", "Dịch vụ (VND)", "Tổng cộng (VND)"});
+        addReportTab("Top khách hàng", new String[]{"ID", "Khách hàng", "Hạng TV", "Lượt đặt", "Tổng chi tiêu (VND)"});
         addReportTab("Hiệu suất sân", new String[]{"Sân", "Loại", "Giờ đặt", "Giờ mở", "% Hiệu suất"});
         addReportTab("Giờ cao điểm", new String[]{"Giờ", "Lượt đặt", "Giai đoạn"});
         addReportTab("Tỷ lệ hủy sân", new String[]{"Khách hàng", "Số lần hủy", "Tổng lượt", "% Tỷ lệ hủy"});
@@ -126,7 +126,19 @@ public class DashboardPanel extends JPanel {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
         for (Object[] row : data) {
-            model.addRow(row);
+            Object[] formattedRow = new Object[row.length];
+            System.arraycopy(row, 0, formattedRow, 0, row.length);
+            
+            if (tabIndex == 0) {
+                if (formattedRow.length > 1) formattedRow[1] = com.example.winfinal.utils.FormatUtils.formatCurrency(row[1]);
+                if (formattedRow.length > 2) formattedRow[2] = com.example.winfinal.utils.FormatUtils.formatCurrency(row[2]);
+                if (formattedRow.length > 3) formattedRow[3] = com.example.winfinal.utils.FormatUtils.formatCurrency(row[3]);
+                if (formattedRow.length > 4) formattedRow[4] = com.example.winfinal.utils.FormatUtils.formatCurrency(row[4]);
+            } else if (tabIndex == 1) {
+                if (formattedRow.length > 4) formattedRow[4] = com.example.winfinal.utils.FormatUtils.formatCurrency(row[4]);
+            }
+            
+            model.addRow(formattedRow);
         }
     }
 }

@@ -51,7 +51,7 @@ public class EquipmentPanel extends JPanel {
 
         add(headerPanel, BorderLayout.NORTH);
 
-        String[] cols = {"ID", "Tên thiết bị", "Số lượng", "Tình trạng", "Giá thuê/bán"};
+        String[] cols = {"ID", "Tên thiết bị", "Số lượng", "Tình trạng", "Giá thuê/bán (VND)"};
         tableModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -76,12 +76,20 @@ public class EquipmentPanel extends JPanel {
         tableModel.setRowCount(0);
         List<EquipmentDTO> items = equipmentController.getAll();
         for (EquipmentDTO item : items) {
+            String condHTML = item.getCondition();
+            if ("New".equalsIgnoreCase(condHTML)) {
+                condHTML = "<html><font color='#27ae60'><b>Mới</b></font></html>";
+            } else if ("Excellent".equalsIgnoreCase(condHTML)) {
+                condHTML = "<html><font color='#2980b9'><b>Rất tốt</b></font></html>";
+            } else if ("Good".equalsIgnoreCase(condHTML)) {
+                condHTML = "<html><font color='#e67e22'><b>Tốt</b></font></html>";
+            }
             tableModel.addRow(new Object[]{
                 item.getEquipmentId(), 
                 item.getEquipmentName(), 
                 item.getQuantity(), 
-                item.getCondition(), 
-                item.getPrice()
+                condHTML, 
+                com.example.winfinal.utils.FormatUtils.formatCurrency(item.getPrice())
             });
         }
     }
@@ -116,7 +124,10 @@ public class EquipmentPanel extends JPanel {
 
     private void showEditDialog() {
         int row = table.getSelectedRow();
-        if (row == -1) return;
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng để sửa.");
+            return;
+        }
         Integer id = (Integer) table.getValueAt(row, 0);
         EquipmentDTO current = equipmentController.getById(id);
 

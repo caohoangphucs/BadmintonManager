@@ -52,7 +52,7 @@ public class CourtPanel extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
 
         // Table
-        String[] cols = {"ID", "Tên sân", "Loại thảm", "Trạng thái", "Giá/Giờ"};
+        String[] cols = {"ID", "Tên sân", "Loại thảm", "Trạng thái", "Giá/Giờ (VND)"};
         tableModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -77,7 +77,13 @@ public class CourtPanel extends JPanel {
         tableModel.setRowCount(0);
         List<CourtDTO> courts = courtController.getAllCourts();
         for (CourtDTO c : courts) {
-            tableModel.addRow(new Object[]{c.getCourtId(), c.getCourtName(), c.getCourtType(), c.getStatus(), c.getPricePerHour()});
+            String statusHTML = c.getStatus();
+            if ("Available".equalsIgnoreCase(statusHTML)) {
+                statusHTML = "<html><font color='#27ae60'><b>Đang hoạt động</b></font></html>";
+            } else if ("Maintenance".equalsIgnoreCase(statusHTML)) {
+                statusHTML = "<html><font color='#e67e22'><b>Bảo trì</b></font></html>";
+            }
+            tableModel.addRow(new Object[]{c.getCourtId(), c.getCourtName(), c.getCourtType(), statusHTML, com.example.winfinal.utils.FormatUtils.formatCurrency(c.getPricePerHour())});
         }
     }
 
@@ -102,7 +108,10 @@ public class CourtPanel extends JPanel {
 
     private void showEditDialog() {
         int row = table.getSelectedRow();
-        if (row == -1) return;
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng để sửa.");
+            return;
+        }
         Integer id = (Integer) table.getValueAt(row, 0);
         CourtDTO current = courtController.getCourt(id);
 

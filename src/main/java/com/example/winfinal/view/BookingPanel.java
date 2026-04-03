@@ -60,7 +60,7 @@ public class BookingPanel extends JPanel {
         bar.add(btns, BorderLayout.EAST);
         add(bar, BorderLayout.NORTH);
 
-        model = new DefaultTableModel(new String[]{"ID", "Khách hàng", "Sân", "Ngày đặt", "Bắt đầu", "Kết thúc", "Giá tiền", "Trạng thái"}, 0);
+        model = new DefaultTableModel(new String[]{"ID", "Khách hàng", "Sân", "Ngày đặt", "Bắt đầu", "Kết thúc", "Giá tiền (VND)", "Trạng thái"}, 0);
         table = new com.example.winfinal.view.components.ModernTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
@@ -70,9 +70,8 @@ public class BookingPanel extends JPanel {
 
     private void loadData() {
         model.setRowCount(0);
-        java.text.NumberFormat format = java.text.NumberFormat.getInstance(java.util.Locale.forLanguageTag("vi-VN"));
         bookingController.getAll().forEach(b -> {
-            String priceStr = format.format(b.getTotalPrice());
+            String priceStr = com.example.winfinal.utils.FormatUtils.formatCurrency(b.getTotalPrice());
             String statusHTML = b.getStatus();
             if ("Confirmed".equals(statusHTML)) {
                 statusHTML = "<html><font color='#27ae60'><b>Đã xác nhận</b></font></html>";
