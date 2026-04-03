@@ -379,7 +379,7 @@ public class DashboardPanel extends JPanel {
 
         lblExpiringPromos = new JLabel("0");
         lblExpiringPromosNote = new JLabel("khuyến mãi");
-        kpiPanel.add(createKPICard("KM sắp hết hạn", lblExpiringPromos, lblExpiringPromosNote, ORANGE));
+        kpiPanel.add(createKPICard("Khuyến mãi sắp hết hạn", lblExpiringPromos, lblExpiringPromosNote, ORANGE));
 
         return kpiPanel;
     }
@@ -403,7 +403,8 @@ public class DashboardPanel extends JPanel {
         card.add(Box.createVerticalStrut(10));
 
         JLabel titleLbl = new JLabel(title);
-        titleLbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        int titleFontSize = title.length() > 15 ? 11 : 12;
+        titleLbl.setFont(new Font("Segoe UI", Font.PLAIN, titleFontSize));
         titleLbl.setForeground(TEXT_SECONDARY);
         titleLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         card.add(titleLbl);
@@ -719,6 +720,12 @@ public class DashboardPanel extends JPanel {
         renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator("{2}", new DecimalFormat("#,###")));
         renderer.setDefaultItemLabelsVisible(true);
         renderer.setDefaultItemLabelFont(new Font("Segoe UI", Font.PLAIN, 11));
+        
+        // Fix horizontal bar label positioning
+        renderer.setDefaultPositiveItemLabelPosition(new org.jfree.chart.labels.ItemLabelPosition(
+            org.jfree.chart.labels.ItemLabelAnchor.OUTSIDE3, 
+            org.jfree.chart.ui.TextAnchor.CENTER_LEFT
+        ));
 
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setNumberFormatOverride(new DecimalFormat("#,###"));
@@ -760,6 +767,12 @@ public class DashboardPanel extends JPanel {
         renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator("{2}%", new DecimalFormat("#.#")));
         renderer.setDefaultItemLabelsVisible(true);
         renderer.setDefaultItemLabelFont(new Font("Segoe UI", Font.BOLD, 11));
+        
+        // Fix horizontal bar label positioning to attach neatly to the end of the bar
+        renderer.setDefaultPositiveItemLabelPosition(new org.jfree.chart.labels.ItemLabelPosition(
+            org.jfree.chart.labels.ItemLabelAnchor.OUTSIDE3, 
+            org.jfree.chart.ui.TextAnchor.CENTER_LEFT
+        ));
         plot.setRenderer(renderer);
 
         replaceChartContent(courtEfficiencyChartContainer, chart);
@@ -794,14 +807,13 @@ public class DashboardPanel extends JPanel {
         plot.setSectionPaint("Chờ xác nhận (" + pending + ")", ORANGE);
         plot.setSectionPaint("Đã hủy (" + cancelled + ")", RED);
         plot.setSectionDepth(0.35);
-        plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0}\n{2}"));
-        plot.setLabelFont(new Font("Segoe UI", Font.PLAIN, 12));
-        plot.setLabelBackgroundPaint(new Color(255, 255, 255, 200));
-        plot.setLabelShadowPaint(null);
+        
+        // Remove labels entirely
+        plot.setLabelGenerator(null);
+        
         plot.setShadowPaint(null);
         plot.setOutlineVisible(false);
         plot.setBackgroundPaint(CARD_BG);
-        plot.setSimpleLabels(true);
         plot.setInsets(new RectangleInsets(10, 40, 10, 40));
 
         replaceChartContent(cancellationChartContainer, chart);
