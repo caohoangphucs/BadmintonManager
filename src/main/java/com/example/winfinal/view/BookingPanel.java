@@ -1,6 +1,7 @@
 package com.example.winfinal.view;
 
 import com.example.winfinal.controller.BookingController;
+import com.example.winfinal.dto.BookingDTO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -28,27 +29,43 @@ public class BookingPanel extends JPanel {
 
         JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btns.setBackground(Color.WHITE);
+        JButton bookBtn = createButton("Đặt sân", new Color(46, 204, 113));
         JButton cancelBtn = createButton("Hủy đặt sân", new Color(231, 76, 60));
         JButton refreshBtn = createButton("Làm mới", new Color(52, 152, 219));
 
+        bookBtn.addActionListener(e -> showBookCourtDialog());
+
         cancelBtn.addActionListener(e -> {
             int r = table.getSelectedRow();
-            if (r != -1) {
-                bookingController.cancelBooking((Integer) table.getValueAt(r, 0));
-                loadData();
+            if (r == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn lượt đặt sân cần hủy.");
+            } else {
+                if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn hủy lượt đặt sân này?", "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                    try {
+                        bookingController.cancelBooking((Integer) table.getValueAt(r, 0));
+                        JOptionPane.showMessageDialog(this, "Hủy đặt sân thành công.");
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(this, ex.getMessage(), "Thông báo", JOptionPane.WARNING_MESSAGE);
+                    } finally {
+                        loadData();
+                    }
+                }
             }
         });
         refreshBtn.addActionListener(e -> loadData());
 
+        btns.add(bookBtn);
         btns.add(cancelBtn);
         btns.add(refreshBtn);
         bar.add(btns, BorderLayout.EAST);
         add(bar, BorderLayout.NORTH);
 
         model = new DefaultTableModel(new String[]{"ID", "Khách hàng", "Sân", "Ngày đặt", "Bắt đầu", "Kết thúc", "Giá tiền", "Trạng thái"}, 0);
-        table = new JTable(model);
-        table.setRowHeight(30);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        table = new com.example.winfinal.view.components.ModernTable(model);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     private void loadData() {
@@ -63,6 +80,43 @@ public class BookingPanel extends JPanel {
         b.setBackground(color);
         b.setForeground(Color.WHITE);
         b.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return b;
+    }
+
+    private void showBookCourtDialog() {
+        JTextField custId = new JTextField();
+        JTextField courtId = new JTextField();
+        JTextField date = new JTextField(java.time.LocalDate.now().toString());
+        JTextField startTime = new JTextField("08:00");
+        JTextField endTime = new JTextField("09:00");
+        JTextField price = new JTextField();
+
+        Object[] fields = {
+            "ID Khách hàng:", custId,
+            "ID Sân:", courtId,
+            "Ngày đặt (YYYY-MM-DD):", date,
+            "Bắt đầu (HH:MM):", startTime,
+            "Kết thúc (HH:MM):", endTime,
+            "Giá tiền:", price
+        };
+        
+        if (JOptionPane.showConfirmDialog(this, fields, "Đặt sân mới", JOptionPane.OK_CANCEL_OPTION) == 0) {
+            try {
+                BookingDTO dto = BookingDTO.builder()
+                    .customerId(Integer.parseInt(custId.getText()))
+                    .courtId(Integer.parseInt(courtId.getText()))
+                    .bookingDate(java.time.LocalDate.parse(date.getText()))
+                    .startTime(java.time.LocalTime.parse(startTime.getText()))
+                    .endTime(java.time.LocalTime.parse(endTime.getText()))
+                    .totalPrice(new java.math.BigDecimal(price.getText()))
+                    .status("Confirmed")
+                    .build();
+                bookingController.createBooking(dto);
+                loadData();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi nhập liệu: " + ex.getMessage());
+            }
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.example.winfinal.service;
 
+import com.example.winfinal.dao.BookingDAO;
 import com.example.winfinal.dao.CustomerDAO;
+import com.example.winfinal.dao.FeedbackDAO;
 import com.example.winfinal.dto.CustomerDTO;
 import com.example.winfinal.entity.Customer;
 import com.example.winfinal.mapper.CustomerMapper;
@@ -10,10 +12,14 @@ import java.util.stream.Collectors;
 
 public class CustomerService {
     private final CustomerDAO customerDAO;
+    private final BookingDAO bookingDAO;
+    private final FeedbackDAO feedbackDAO;
     private final CustomerMapper customerMapper = CustomerMapper.INSTANCE;
 
     public CustomerService() {
         this.customerDAO = new CustomerDAO();
+        this.bookingDAO = new BookingDAO();
+        this.feedbackDAO = new FeedbackDAO();
     }
 
     public List<CustomerDTO> getAllCustomers() {
@@ -39,6 +45,9 @@ public class CustomerService {
     }
 
     public void deleteCustomer(Integer id) {
+        if (bookingDAO.existsByCustomerId(id) || feedbackDAO.existsByCustomerId(id)) {
+            throw new RuntimeException("Khách hàng này không thể xóa vì đang được sử dụng trong hệ thống.");
+        }
         customerDAO.deleteById(id);
     }
 }

@@ -16,4 +16,31 @@ public class BookingDAO extends BaseDAO<Booking, Integer> {
                      .getResultList();
         }
     }
+
+    public boolean existsByCourtId(Integer courtId) {
+        try (EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager()) {
+            Long count = em.createQuery("select count(b) from Booking b where b.court.courtId = :courtId", Long.class)
+                     .setParameter("courtId", courtId)
+                     .getSingleResult();
+            return count > 0;
+        }
+    }
+
+    public boolean existsByCustomerId(Integer customerId) {
+        try (EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager()) {
+            Long count = em.createQuery("select count(b) from Booking b where b.customer.customerId = :customerId", Long.class)
+                     .setParameter("customerId", customerId)
+                     .getSingleResult();
+            return count > 0;
+        }
+    }
+
+    public boolean existsByPromotionId(Integer promoId) {
+        try (EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager()) {
+            Long count = em.createQuery("select count(b) from Booking b join b.promotions p where p.promoId = :promoId", Long.class)
+                     .setParameter("promoId", promoId)
+                     .getSingleResult();
+            return count > 0;
+        }
+    }
 }

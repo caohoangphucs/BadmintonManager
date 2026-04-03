@@ -35,8 +35,13 @@ public class BookingController {
     public void cancelBooking(Integer id) {
         BookingDTO booking = bookingService.getBookingById(id);
         if (booking != null) {
+            if ("Cancelled".equalsIgnoreCase(booking.getStatus())) {
+                throw new RuntimeException("Lượt đặt sân này đã bị hủy từ trước.");
+            }
             booking.setStatus("Cancelled");
             bookingService.updateBooking(booking);
+        } else {
+            throw new RuntimeException("Không tìm thấy lượt đặt sân này trong hệ thống.");
         }
     }
 

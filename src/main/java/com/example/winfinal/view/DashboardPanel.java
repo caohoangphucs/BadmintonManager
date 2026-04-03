@@ -99,13 +99,11 @@ public class DashboardPanel extends JPanel {
 
     private void addReportTab(String title, String[] columns) {
         DefaultTableModel model = new DefaultTableModel(columns, 0);
-        JTable table = new JTable(model);
-        table.setRowHeight(30);
-        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
-        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        JTable table = new com.example.winfinal.view.components.ModernTable(model);
         
         JScrollPane scroll = new JScrollPane(table);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
+        scroll.getViewport().setBackground(Color.WHITE);
         reportTabs.addTab(title, scroll);
     }
 

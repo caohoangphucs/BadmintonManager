@@ -56,11 +56,11 @@ public class PromotionPanel extends JPanel {
         tableModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
-        table = new JTable(tableModel);
-        table.setRowHeight(30);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        table = new com.example.winfinal.view.components.ModernTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     private JButton createButton(String text, Color color) {
@@ -149,10 +149,19 @@ public class PromotionPanel extends JPanel {
 
     private void deleteSelected() {
         int row = table.getSelectedRow();
-        if (row == -1) return;
-        if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa khuyến mãi này?") == JOptionPane.YES_OPTION) {
-            promotionController.delete((Integer) table.getValueAt(row, 0));
-            loadData();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng để xóa.");
+            return;
+        }
+        if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa khuyến mãi này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            try {
+                promotionController.delete((Integer) table.getValueAt(row, 0));
+                JOptionPane.showMessageDialog(this, "Xóa thành công.");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Thông báo", JOptionPane.WARNING_MESSAGE);
+            } finally {
+                loadData();
+            }
         }
     }
 }

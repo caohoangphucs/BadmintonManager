@@ -42,9 +42,17 @@ public class CustomerPanel extends JPanel {
         });
         delBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (row != -1) {
-                if (JOptionPane.showConfirmDialog(this, "Bạn có muốn xóa khách hàng này không?") == 0) {
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng để xóa.");
+                return;
+            }
+            if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa khách hàng này không?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                try {
                     customerController.delete((Integer) table.getValueAt(row, 0));
+                    JOptionPane.showMessageDialog(this, "Xóa thành công.");
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Thông báo", JOptionPane.WARNING_MESSAGE);
+                } finally {
                     loadData();
                 }
             }
@@ -59,9 +67,11 @@ public class CustomerPanel extends JPanel {
         add(north, BorderLayout.NORTH);
 
         tableModel = new DefaultTableModel(new String[]{"ID", "Họ tên", "Số điện thoại", "Email", "Hạng TV"}, 0);
-        table = new JTable(tableModel);
-        table.setRowHeight(30);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        table = new com.example.winfinal.view.components.ModernTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     private void loadData() {
