@@ -31,13 +31,36 @@ public class BookingPanel extends JPanel {
         JPanel northWrapper = new JPanel(new BorderLayout(0, 10));
         northWrapper.setBackground(Color.WHITE);
 
+        // ── Title block wrapper (title + subtitle + separator) ────────────────
+        JPanel headerWrapper = new JPanel();
+        headerWrapper.setLayout(new BoxLayout(headerWrapper, BoxLayout.Y_AXIS));
+        headerWrapper.setBackground(Color.WHITE);
+
         JPanel bar = new JPanel(new BorderLayout());
         bar.setBackground(Color.WHITE);
-        JLabel title = new JLabel("Quản lý lượt đặt sân");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        bar.add(title, BorderLayout.WEST);
+        bar.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Title block: title + subtitle stacked
+        JPanel titleBlock = new JPanel();
+        titleBlock.setLayout(new BoxLayout(titleBlock, BoxLayout.Y_AXIS));
+        titleBlock.setBackground(Color.WHITE);
+
+        JLabel title = new JLabel("Quản lý lượt đặt sân");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(new Color(31, 41, 55));
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleBlock.add(title);
+
+        JLabel subtitle = new JLabel("Quản lý danh sách đặt sân và trạng thái booking");
+        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        subtitle.setForeground(new Color(107, 114, 128));
+        subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleBlock.add(Box.createVerticalStrut(2));
+        titleBlock.add(subtitle);
+
+        bar.add(titleBlock, BorderLayout.WEST);
+
+        JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         btns.setBackground(Color.WHITE);
         JButton bookBtn = createButton("Đặt sân", new Color(16, 185, 129));
         JButton cancelBtn = createButton("Hủy đặt sân", new Color(239, 68, 68));
@@ -72,7 +95,18 @@ public class BookingPanel extends JPanel {
         btns.add(cancelBtn);
         btns.add(refreshBtn);
         bar.add(btns, BorderLayout.EAST);
-        northWrapper.add(bar, BorderLayout.NORTH);
+
+        headerWrapper.add(bar);
+        headerWrapper.add(Box.createVerticalStrut(8));
+
+        // Subtle separator
+        JSeparator sep = new JSeparator();
+        sep.setForeground(new Color(220, 222, 226));
+        sep.setAlignmentX(Component.LEFT_ALIGNMENT);
+        sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        headerWrapper.add(sep);
+
+        northWrapper.add(headerWrapper, BorderLayout.NORTH);
 
         // ── Filter Panel ─────────────────────────────────────────────────────
         JPanel filterCard = new JPanel(new GridBagLayout());

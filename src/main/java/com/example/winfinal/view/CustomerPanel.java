@@ -22,13 +22,36 @@ public class CustomerPanel extends JPanel {
     }
 
     private void initComponents() {
+        // ── Header wrapper (title + subtitle + separator) ─────────────────────
+        JPanel headerWrapper = new JPanel();
+        headerWrapper.setLayout(new BoxLayout(headerWrapper, BoxLayout.Y_AXIS));
+        headerWrapper.setBackground(Color.WHITE);
+
         JPanel north = new JPanel(new BorderLayout());
         north.setBackground(Color.WHITE);
-        JLabel header = new JLabel("Quản lý khách hàng");
-        header.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        north.add(header, BorderLayout.WEST);
+        north.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Title block: title + subtitle stacked
+        JPanel titleBlock = new JPanel();
+        titleBlock.setLayout(new BoxLayout(titleBlock, BoxLayout.Y_AXIS));
+        titleBlock.setBackground(Color.WHITE);
+
+        JLabel header = new JLabel("Quản lý khách hàng");
+        header.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        header.setForeground(new Color(31, 41, 55));
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleBlock.add(header);
+
+        JLabel subtitle = new JLabel("Theo dõi thông tin khách hàng và hạng thành viên");
+        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        subtitle.setForeground(new Color(107, 114, 128));
+        subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleBlock.add(Box.createVerticalStrut(2));
+        titleBlock.add(subtitle);
+
+        north.add(titleBlock, BorderLayout.WEST);
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         btnPanel.setBackground(Color.WHITE);
         JButton addBtn = createStyledButton("Thêm khách hàng", new Color(16, 185, 129));
         JButton editBtn = createStyledButton("Sửa", new Color(245, 158, 11));
@@ -68,7 +91,19 @@ public class CustomerPanel extends JPanel {
         btnPanel.add(delBtn);
         btnPanel.add(refreshBtn);
         north.add(btnPanel, BorderLayout.EAST);
-        add(north, BorderLayout.NORTH);
+
+        headerWrapper.add(north);
+        headerWrapper.add(Box.createVerticalStrut(10));
+
+        // Subtle separator
+        JSeparator sep = new JSeparator();
+        sep.setForeground(new Color(220, 222, 226));
+        sep.setAlignmentX(Component.LEFT_ALIGNMENT);
+        sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        headerWrapper.add(sep);
+        headerWrapper.add(Box.createVerticalStrut(10));
+
+        add(headerWrapper, BorderLayout.NORTH);
 
         tableModel = new DefaultTableModel(new String[]{"ID", "Họ tên", "Số điện thoại", "Email", "Hạng TV"}, 0);
         table = new com.example.winfinal.view.components.ModernTable(tableModel);

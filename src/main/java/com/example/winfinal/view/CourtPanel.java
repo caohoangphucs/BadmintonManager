@@ -23,15 +23,37 @@ public class CourtPanel extends JPanel {
     }
 
     private void initComponents() {
-        // Header and Actions
+        // ── Header wrapper (title + subtitle + separator) ─────────────────────
+        JPanel headerWrapper = new JPanel();
+        headerWrapper.setLayout(new BoxLayout(headerWrapper, BoxLayout.Y_AXIS));
+        headerWrapper.setBackground(Color.WHITE);
+
+        // Title row (title left + action buttons right)
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(Color.WHITE);
-        
-        JLabel header = new JLabel("Quản lý sân");
-        header.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        headerPanel.add(header, BorderLayout.WEST);
+        headerPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Title block: title + subtitle stacked
+        JPanel titleBlock = new JPanel();
+        titleBlock.setLayout(new BoxLayout(titleBlock, BoxLayout.Y_AXIS));
+        titleBlock.setBackground(Color.WHITE);
+
+        JLabel header = new JLabel("Quản lý sân");
+        header.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        header.setForeground(new Color(31, 41, 55));
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleBlock.add(header);
+
+        JLabel subtitle = new JLabel("Theo dõi và quản lý thông tin các sân cầu lông");
+        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        subtitle.setForeground(new Color(107, 114, 128));
+        subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleBlock.add(Box.createVerticalStrut(2));
+        titleBlock.add(subtitle);
+
+        headerPanel.add(titleBlock, BorderLayout.WEST);
+
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         actions.setBackground(Color.WHITE);
         JButton btnAdd = createButton("Thêm sân", new Color(16, 185, 129));
         JButton btnEdit = createButton("Sửa", new Color(245, 158, 11));
@@ -49,7 +71,18 @@ public class CourtPanel extends JPanel {
         actions.add(btnRefresh);
         headerPanel.add(actions, BorderLayout.EAST);
 
-        add(headerPanel, BorderLayout.NORTH);
+        headerWrapper.add(headerPanel);
+        headerWrapper.add(Box.createVerticalStrut(10));
+
+        // Subtle separator
+        JSeparator sep = new JSeparator();
+        sep.setForeground(new Color(220, 222, 226));
+        sep.setAlignmentX(Component.LEFT_ALIGNMENT);
+        sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        headerWrapper.add(sep);
+        headerWrapper.add(Box.createVerticalStrut(10));
+
+        add(headerWrapper, BorderLayout.NORTH);
 
         // Table
         String[] cols = {"ID", "Tên sân", "Loại thảm", "Trạng thái", "Giá/Giờ (VND)"};
