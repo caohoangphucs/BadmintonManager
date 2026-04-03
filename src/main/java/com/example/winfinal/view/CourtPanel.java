@@ -85,9 +85,11 @@ public class CourtPanel extends JPanel {
         add(headerWrapper, BorderLayout.NORTH);
 
         // Table
-        String[] cols = {"ID", "Tên sân", "Loại thảm", "Trạng thái", "Giá/Giờ (VND)"};
+        String[] cols = { "ID", "Tên sân", "Loại thảm", "Trạng thái", "Giá/Giờ (VND)" };
         tableModel = new DefaultTableModel(cols, 0) {
-            public boolean isCellEditable(int r, int c) { return false; }
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         table = new com.example.winfinal.view.components.ModernTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
@@ -110,26 +112,65 @@ public class CourtPanel extends JPanel {
             } else if ("Maintenance".equalsIgnoreCase(statusHTML)) {
                 statusHTML = "<html><font color='#e67e22'><b>Bảo trì</b></font></html>";
             }
-            tableModel.addRow(new Object[]{c.getCourtId(), c.getCourtName(), c.getCourtType(), statusHTML, com.example.winfinal.utils.FormatUtils.formatCurrency(c.getPricePerHour())});
+            tableModel.addRow(new Object[] { c.getCourtId(), c.getCourtName(), c.getCourtType(), statusHTML,
+                    com.example.winfinal.utils.FormatUtils.formatCurrency(c.getPricePerHour()) });
         }
+    }
+
+    // ── Court-type options ────────────────────────────────────────────────────
+    private static final String[] COURT_TYPES = {
+            "Thảm Hải Yến",
+            "Thảm Yonex",
+            "Sân Gỗ",
+            "Thảm Đặc Biệt"
+    };
+
+    // ── Status helpers: DB value ↔ Vietnamese display label ───────────────────
+    private static String statusToViet(String dbValue) {
+        if ("Available".equalsIgnoreCase(dbValue))
+            return "Đang hoạt động";
+        if ("Maintenance".equalsIgnoreCase(dbValue))
+            return "Bảo trì";
+        return "Đang hoạt động"; // default
+    }
+
+    private static String statusToDb(String vietLabel) {
+        if ("Bảo trì".equals(vietLabel))
+            return "Maintenance";
+        return "Available"; // default covers "Đang hoạt động"
     }
 
     private void showAddDialog() {
         JTextField name = new JTextField();
-        JTextField type = new JTextField();
-        JTextField status = new JTextField("Available");
+
+        JComboBox<String> typeCombo = new JComboBox<>(COURT_TYPES);
+        typeCombo.setPreferredSize(new Dimension(200, 30));
+
+        JComboBox<String> statusCombo = new JComboBox<>(new String[] { "Đang hoạt động", "Bảo trì" });
+        statusCombo.setPreferredSize(new Dimension(200, 30));
+
         JTextField price = new JTextField();
 
-        Object[] message = { "Tên sân:", name, "Loại thảm:", type, "Trạng thái:", status, "Giá/Giờ:", price };
+        Object[] message = {
+                "Tên sân:", name,
+                "Loại thảm:", typeCombo,
+                "Trạng thái:", statusCombo,
+                "Giá/Giờ:", price
+        };
         int option = JOptionPane.showConfirmDialog(this, message, "Thêm sân mới", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            courtController.addCourt(CourtDTO.builder()
-                .courtName(name.getText())
-                .courtType(type.getText())
-                .status(status.getText())
-                .pricePerHour(new java.math.BigDecimal(price.getText()))
-                .build());
-            loadData();
+            try {
+                courtController.addCourt(CourtDTO.builder()
+                        .courtName(name.getText())
+                        .courtType((String) typeCombo.getSelectedItem())
+                        .status(statusToDb((String) statusCombo.getSelectedItem()))
+                        .pricePerHour(new java.math.BigDecimal(price.getText()))
+                        .build());
+                loadData();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi dữ liệu: " + ex.getMessage(), "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -143,19 +184,51 @@ public class CourtPanel extends JPanel {
         CourtDTO current = courtController.getCourt(id);
 
         JTextField name = new JTextField(current.getCourtName());
-        JTextField type = new JTextField(current.getCourtType());
-        JTextField status = new JTextField(current.getStatus());
+
+        JComboBox<String> typeCombo = new JComboBox<>(COURT_TYPES);
+        typeCombo.setPreferredSize(new Dimension(200, 30));
+        // Pre-select the current court type if it matches one of the options
+        String currentType = current.getCourtType();
+        boolean typeFound = false;
+        for (String t : COURT_TYPES) {
+            if (t.equalsIgnoreCase(currentType)) {
+                typeCombo.setSelectedItem(t);
+                typeFound = true;
+                break;
+            }
+        }
+        if (!typeFound && currentType != null && !currentType.isBlank()) {
+            // Keep the existing value as a custom entry without losing data
+            typeCombo.setEditable(true);
+            typeCombo.setSelectedItem(currentType);
+        }
+
+        JComboBox<String> statusCombo = new JComboBox<>(new String[] { "Đang hoạt động", "Bảo trì" });
+        statusCombo.setPreferredSize(new Dimension(200, 30));
+        statusCombo.setSelectedItem(statusToViet(current.getStatus()));
+
         JTextField price = new JTextField(current.getPricePerHour().toString());
 
-        Object[] message = { "Tên sân:", name, "Loại thảm:", type, "Trạng thái:", status, "Giá/Giờ:", price };
-        int option = JOptionPane.showConfirmDialog(this, message, "Cập nhật thông tin sân", JOptionPane.OK_CANCEL_OPTION);
+        Object[] message = {
+                "Tên sân:", name,
+                "Loại thảm:", typeCombo,
+                "Trạng thái:", statusCombo,
+                "Giá/Giờ:", price
+        };
+        int option = JOptionPane.showConfirmDialog(this, message, "Cập nhật thông tin sân",
+                JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            current.setCourtName(name.getText());
-            current.setCourtType(type.getText());
-            current.setStatus(status.getText());
-            current.setPricePerHour(new java.math.BigDecimal(price.getText()));
-            courtController.updateCourt(current);
-            loadData();
+            try {
+                current.setCourtName(name.getText());
+                current.setCourtType((String) typeCombo.getSelectedItem());
+                current.setStatus(statusToDb((String) statusCombo.getSelectedItem()));
+                current.setPricePerHour(new java.math.BigDecimal(price.getText()));
+                courtController.updateCourt(current);
+                loadData();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi dữ liệu: " + ex.getMessage(), "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -165,13 +238,15 @@ public class CourtPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng để xóa.");
             return;
         }
-        if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa sân này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa sân này?", "Xác nhận xóa",
+                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             try {
                 courtController.deleteCourt((Integer) table.getValueAt(row, 0));
                 loadData();
                 JOptionPane.showMessageDialog(this, "Xóa thành công.");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi khi xóa: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Lỗi khi xóa: " + ex.getMessage(), "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }

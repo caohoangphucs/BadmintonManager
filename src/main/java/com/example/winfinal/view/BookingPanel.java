@@ -1,27 +1,39 @@
 package com.example.winfinal.view;
 
 import com.example.winfinal.controller.BookingController;
+import com.example.winfinal.controller.CustomerController;
+import com.example.winfinal.controller.CourtController;
 import com.example.winfinal.dto.BookingDTO;
+import com.example.winfinal.dto.CustomerDTO;
+import com.example.winfinal.dto.CourtDTO;
 import javax.swing.*;
-
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalTime;
+import java.time.LocalDate;
+import java.util.List;
 
 public class BookingPanel extends JPanel {
     private final BookingController bookingController;
+    private final CustomerController customerController;
+    private final CourtController    courtController;
     private JTable table;
     private DefaultTableModel model;
-    
+
     private JComboBox<String> courtCombo;
     private JComboBox<String> statusCombo;
 
     public BookingPanel() {
-        this.bookingController = new BookingController();
-        setLayout(new BorderLayout(10,10));
-        setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+        this.bookingController  = new BookingController();
+        this.customerController = new CustomerController();
+        this.courtController    = new CourtController();
+        setLayout(new BorderLayout(10, 10));
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setBackground(Color.WHITE);
         initComponents();
         loadData();
@@ -281,37 +293,163 @@ public class BookingPanel extends JPanel {
     }
 
     private void showBookCourtDialog() {
-        JTextField custId = new JTextField();
-        JTextField courtId = new JTextField();
-        JTextField date = new JTextField(java.time.LocalDate.now().toString());
-        JTextField startTime = new JTextField("08:00");
-        JTextField endTime = new JTextField("09:00");
-        JTextField price = new JTextField();
+        // ── 1. Load fresh data from DB (courts required; customers used for save-time ID lookup) ─
+        List<CustomerDTO> customers = customerController.getAll();
+        List<CourtDTO>    courts    = courtController.getAllCourts();
 
-        Object[] fields = {
-            "ID Khách hàng:", custId,
-            "ID Sân:", courtId,
-            "Ngày đặt (YYYY-MM-DD):", date,
-            "Bắt đầu (HH:MM):", startTime,
-            "Kết thúc (HH:MM):", endTime,
-            "Giá tiền:", price
-        };
-        
-        if (JOptionPane.showConfirmDialog(this, fields, "Đặt sân mới", JOptionPane.OK_CANCEL_OPTION) == 0) {
+        if (courts.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Chưa có sân nào trong hệ thống. Vui lòng thêm sân trước.",
+                "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // ── 2. Customer name — free-text input ────────────────────────────────────
+        JTextField customerNameField = new JTextField();
+        customerNameField.setPreferredSize(new Dimension(240, 30));
+
+        // ── 3. Court combo — typed, renderer-based ───────────────────────────────
+        JComboBox<CourtDTO> courtDialogCombo = new JComboBox<>(courts.toArray(new CourtDTO[0]));
+        courtDialogCombo.setPreferredSize(new Dimension(240, 30));
+        courtDialogCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public java.awt.Component getListCellRendererComponent(
+                    JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof CourtDTO ct) {
+                    setText(ct.getCourtName() + " — "
+                        + com.example.winfinal.utils.FormatUtils.formatCurrency(ct.getPricePerHour()) + " ₫/giờ");
+                }
+                return this;
+            }
+        });
+
+        // ── 4. Date field ──────────────────────────────────────────────────────
+        JTextField dateField = new JTextField(LocalDate.now().toString());
+        dateField.setPreferredSize(new Dimension(240, 30));
+
+        // ── 5. Hour-slot combos (00:00 – 23:00, whole hours only) ────────────────
+        String[] hourSlots = new String[24];
+        for (int h = 0; h < 24; h++) {
+            hourSlots[h] = String.format("%02d:00", h);
+        }
+
+        JComboBox<String> startCombo = new JComboBox<>(hourSlots);
+        startCombo.setSelectedItem("08:00");
+        startCombo.setPreferredSize(new Dimension(240, 30));
+
+        JComboBox<String> endCombo = new JComboBox<>(hourSlots);
+        endCombo.setSelectedItem("09:00");
+        endCombo.setPreferredSize(new Dimension(240, 30));
+
+        // ── 6. Price field — read-only, auto-calculated ───────────────────────────
+        JTextField priceField = new JTextField();
+        priceField.setPreferredSize(new Dimension(240, 30));
+        priceField.setEditable(false);
+        priceField.setBackground(new Color(245, 247, 250));
+        priceField.setForeground(new Color(31, 41, 55));
+        priceField.setFont(new Font("Segoe UI", Font.BOLD, 13));
+
+        // ── 7. Auto-calculate price ───────────────────────────────────────────────
+        Runnable recalcPrice = () -> {
             try {
+                CourtDTO sel = (CourtDTO) courtDialogCombo.getSelectedItem();
+                if (sel == null || sel.getPricePerHour() == null) return;
+                LocalTime st = LocalTime.parse((String) startCombo.getSelectedItem());
+                LocalTime et = LocalTime.parse((String) endCombo.getSelectedItem());
+                if (!et.isAfter(st)) { priceField.setText("—"); return; }
+                long minutes = java.time.Duration.between(st, et).toMinutes();
+                BigDecimal bookedHours = BigDecimal.valueOf(minutes)
+                        .divide(BigDecimal.valueOf(60), 4, RoundingMode.HALF_UP);
+                BigDecimal total = sel.getPricePerHour()
+                        .multiply(bookedHours).setScale(0, RoundingMode.HALF_UP);
+                priceField.setText(com.example.winfinal.utils.FormatUtils.formatCurrency(total) + " ₫");
+            } catch (Exception ignored) {}
+        };
+
+        courtDialogCombo.addActionListener(e -> recalcPrice.run());
+        startCombo.addActionListener(e -> recalcPrice.run());
+        endCombo.addActionListener(e -> recalcPrice.run());
+        recalcPrice.run(); // initial fill
+
+        // ── 8. Assemble dialog ────────────────────────────────────────────────────
+        Object[] fields = {
+            "Tên khách hàng:",        customerNameField,
+            "Tên sân:",               courtDialogCombo,
+            "Ngày đặt (YYYY-MM-DD):", dateField,
+            "Bắt đầu:",               startCombo,
+            "Kết thúc:",              endCombo,
+            "Giá tiền (VND):",        priceField
+        };
+
+        if (JOptionPane.showConfirmDialog(this, fields, "Đặt sân mới",
+                JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            try {
+                // \u2500\u2500 Resolve or create customer \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+                String typedName = customerNameField.getText().trim();
+                if (typedName.isEmpty()) {
+                    JOptionPane.showMessageDialog(this,
+                        "Vui l\u00f2ng nh\u1eadp t\u00ean kh\u00e1ch h\u00e0ng.", "Thi\u1ebfu th\u00f4ng tin", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // Try to find an existing customer with this exact name (case-insensitive)
+                Integer resolvedCustomerId = customers.stream()
+                    .filter(c -> c.getFullName().equalsIgnoreCase(typedName))
+                    .map(CustomerDTO::getCustomerId)
+                    .findFirst().orElse(null);
+
+                if (resolvedCustomerId == null) {
+                    // Name not found \u2014 create a new customer record; DB generates the ID (IDENTITY strategy)
+                    customerController.create(CustomerDTO.builder()
+                        .fullName(typedName)
+                        .membershipType("Standard")
+                        .build());
+
+                    // Re-fetch the full list to locate the newly inserted ID
+                    resolvedCustomerId = customerController.getAll().stream()
+                        .filter(c -> c.getFullName().equalsIgnoreCase(typedName))
+                        .map(CustomerDTO::getCustomerId)
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException(
+                            "T\u1ea1o kh\u00e1ch h\u00e0ng m\u1edbi th\u1ea5t b\u1ea1i. Vui l\u00f2ng th\u1eed l\u1ea1i."));
+                }
+
+                CourtDTO chosenCourt = (CourtDTO) courtDialogCombo.getSelectedItem();
+
+                LocalTime st = LocalTime.parse((String) startCombo.getSelectedItem());
+                LocalTime et = LocalTime.parse((String) endCombo.getSelectedItem());
+
+                // Validate time range before saving
+                if (!et.isAfter(st)) {
+                    JOptionPane.showMessageDialog(this,
+                        "Gi\u1edd k\u1ebft th\u00fac ph\u1ea3i sau gi\u1edd b\u1eaft \u0111\u1ea7u.\nVui l\u00f2ng ch\u1ecdn l\u1ea1i.",
+                        "Th\u1eddi gian kh\u00f4ng h\u1ee3p l\u1ec7", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // Recompute price from DTOs \u2014 never rely on the display string
+                long minutes = java.time.Duration.between(st, et).toMinutes();
+                BigDecimal bookedHours = BigDecimal.valueOf(minutes)
+                        .divide(BigDecimal.valueOf(60), 4, RoundingMode.HALF_UP);
+                BigDecimal totalPrice = chosenCourt.getPricePerHour()
+                        .multiply(bookedHours).setScale(0, RoundingMode.HALF_UP);
+
                 BookingDTO dto = BookingDTO.builder()
-                    .customerId(Integer.parseInt(custId.getText()))
-                    .courtId(Integer.parseInt(courtId.getText()))
-                    .bookingDate(java.time.LocalDate.parse(date.getText()))
-                    .startTime(java.time.LocalTime.parse(startTime.getText()))
-                    .endTime(java.time.LocalTime.parse(endTime.getText()))
-                    .totalPrice(new java.math.BigDecimal(price.getText()))
+                    .customerId(resolvedCustomerId)
+                    .customerFullName(typedName)
+                    .courtId(chosenCourt.getCourtId())
+                    .bookingDate(LocalDate.parse(dateField.getText().trim()))
+                    .startTime(st)
+                    .endTime(et)
+                    .totalPrice(totalPrice)
                     .status("Confirmed")
                     .build();
                 bookingController.createBooking(dto);
                 loadData();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi nhập liệu: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Lỗi nhập liệu: " + ex.getMessage(),
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
