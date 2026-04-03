@@ -33,10 +33,10 @@ public class EquipmentPanel extends JPanel {
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actions.setBackground(Color.WHITE);
-        JButton btnAdd = createButton("Thêm thiết bị", new Color(46, 204, 113));
-        JButton btnEdit = createButton("Sửa", new Color(241, 196, 15));
-        JButton btnDelete = createButton("Xóa", new Color(231, 76, 60));
-        JButton btnRefresh = createButton("Làm mới", new Color(52, 152, 219));
+        JButton btnAdd = createButton("Thêm thiết bị", new Color(16, 185, 129));
+        JButton btnEdit = createButton("Sửa", new Color(245, 158, 11));
+        JButton btnDelete = createButton("Xóa", new Color(239, 68, 68));
+        JButton btnRefresh = createButton("Làm mới", new Color(59, 130, 246));
 
         btnAdd.addActionListener(e -> showAddDialog());
         btnEdit.addActionListener(e -> showEditDialog());
@@ -63,13 +63,7 @@ public class EquipmentPanel extends JPanel {
     }
 
     private JButton createButton(String text, Color color) {
-        JButton b = new JButton(text);
-        b.setBackground(color);
-        b.setForeground(Color.WHITE);
-        b.setFocusPainted(false);
-        b.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return b;
+        return new com.example.winfinal.view.components.ModernButton(text, color);
     }
 
     private void loadData() {

@@ -255,4 +255,71 @@ public class ReportDAO {
             return em.createNativeQuery(sql).getResultList();
         }
     }
+
+    /**
+     * KPI: Total Revenue (all time, confirmed bookings)
+     */
+    public Object[] getTotalRevenueSummary() {
+        String sql = "SELECT " +
+                     "    IFNULL(SUM(b.total_price), 0) AS TotalCourtRevenue, " +
+                     "    IFNULL((SELECT SUM(er.rental_price * er.quantity) FROM Equipment_Rental er " +
+                     "           JOIN Booking b2 ON er.booking_id = b2.booking_id WHERE b2.status = 'Confirmed'), 0) AS TotalEquipRevenue, " +
+                     "    IFNULL((SELECT SUM(si.price) FROM Service_Invoice si " +
+                     "           JOIN Booking b3 ON si.booking_id = b3.booking_id WHERE b3.status = 'Confirmed'), 0) AS TotalServiceRevenue " +
+                     "FROM Booking b WHERE b.status = 'Confirmed'";
+        try (EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager()) {
+            List<?> result = em.createNativeQuery(sql).getResultList();
+            if (!result.isEmpty()) return (Object[]) result.get(0);
+            return new Object[]{0, 0, 0};
+        }
+    }
+
+    /**
+     * KPI: Total Bookings count and breakdown
+     */
+    public Object[] getTotalBookingsSummary() {
+        String sql = "SELECT " +
+                     "    COUNT(*) AS TotalBookings, " +
+                     "    COUNT(CASE WHEN status = 'Confirmed' THEN 1 END) AS Confirmed, " +
+                     "    COUNT(CASE WHEN status = 'Pending' THEN 1 END) AS Pending, " +
+                     "    COUNT(CASE WHEN status = 'Cancelled' THEN 1 END) AS Cancelled " +
+                     "FROM Booking";
+        try (EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager()) {
+            List<?> result = em.createNativeQuery(sql).getResultList();
+            if (!result.isEmpty()) return (Object[]) result.get(0);
+            return new Object[]{0, 0, 0, 0};
+        }
+    }
+
+    /**
+     * KPI: Active courts count
+     */
+    public Object[] getActiveCourtsSummary() {
+        String sql = "SELECT " +
+                     "    COUNT(*) AS TotalCourts, " +
+                     "    COUNT(CASE WHEN status = 'Available' THEN 1 END) AS ActiveCourts " +
+                     "FROM Court";
+        try (EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager()) {
+            List<?> result = em.createNativeQuery(sql).getResultList();
+            if (!result.isEmpty()) return (Object[]) result.get(0);
+            return new Object[]{0, 0};
+        }
+    }
+
+    /**
+     * KPI: Expiring promotions count (within 30 days)
+     */
+    public Object[] getExpiringPromotionsSummary() {
+        String sql = "SELECT " +
+                     "    COUNT(*) AS ExpiringCount, " +
+                     "    COUNT(CASE WHEN DATEDIFF(end_date, CURRENT_DATE()) <= 3 THEN 1 END) AS UrgentCount " +
+                     "FROM Promotion " +
+                     "WHERE end_date >= CURRENT_DATE() AND DATEDIFF(end_date, CURRENT_DATE()) <= 30";
+        try (EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager()) {
+            List<?> result = em.createNativeQuery(sql).getResultList();
+            if (!result.isEmpty()) return (Object[]) result.get(0);
+            return new Object[]{0, 0};
+        }
+    }
 }
+

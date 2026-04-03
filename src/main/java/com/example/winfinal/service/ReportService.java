@@ -53,4 +53,21 @@ public class ReportService {
     public List<Object[]> getPaymentMethodStats() {
         return reportDAO.getPaymentMethodStats();
     }
+
+    // KPI Summary Methods
+    public Object[] getTotalRevenueSummary() {
+        return reportDAO.getTotalRevenueSummary();
+    }
+
+    public Object[] getTotalBookingsSummary() {
+        return reportDAO.getTotalBookingsSummary();
+    }
+
+    public Object[] getActiveCourtsSummary() {
+        return reportDAO.getActiveCourtsSummary();
+    }
+
+    public Object[] getExpiringPromotionsSummary() {
+        return reportDAO.getExpiringPromotionsSummary();
+    }
 }

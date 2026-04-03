@@ -30,10 +30,10 @@ public class CustomerPanel extends JPanel {
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnPanel.setBackground(Color.WHITE);
-        JButton addBtn = createStyledButton("Thêm khách hàng", new Color(46, 204, 113));
-        JButton editBtn = createStyledButton("Sửa", new Color(241, 196, 15));
-        JButton delBtn = createStyledButton("Xóa", new Color(231, 76, 60));
-        JButton refreshBtn = createStyledButton("Làm mới", new Color(52, 152, 219));
+        JButton addBtn = createStyledButton("Thêm khách hàng", new Color(16, 185, 129));
+        JButton editBtn = createStyledButton("Sửa", new Color(245, 158, 11));
+        JButton delBtn = createStyledButton("Xóa", new Color(239, 68, 68));
+        JButton refreshBtn = createStyledButton("Làm mới", new Color(59, 130, 246));
 
         addBtn.addActionListener(e -> showForm(null));
         editBtn.addActionListener(e -> {
@@ -119,12 +119,6 @@ public class CustomerPanel extends JPanel {
     }
 
     private JButton createStyledButton(String t, Color c) {
-        JButton b = new JButton(t);
-        b.setBackground(c);
-        b.setForeground(Color.WHITE);
-        b.setFocusPainted(false);
-        b.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return b;
+        return new com.example.winfinal.view.components.ModernButton(t, c);
     }
 }

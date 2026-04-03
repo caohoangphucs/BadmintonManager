@@ -22,4 +22,20 @@ public class FormatUtils {
             return value.toString();
         }
     }
+
+    public static String formatPercentage(Object value) {
+        if (value == null) return "0%";
+        try {
+            double doubleValue;
+            if (value instanceof Number) {
+                doubleValue = ((Number) value).doubleValue();
+            } else {
+                doubleValue = Double.parseDouble(value.toString());
+            }
+            DecimalFormat formatter = new DecimalFormat("#.##");
+            return formatter.format(doubleValue) + "%";
+        } catch (Exception e) {
+            return String.valueOf(value) + "%";
+        }
+    }
 }

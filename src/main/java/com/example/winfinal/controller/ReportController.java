@@ -53,4 +53,21 @@ public class ReportController {
     public List<Object[]> getPaymentMethodStats() {
         return reportService.getPaymentMethodStats();
     }
+
+    // KPI Summary Methods
+    public Object[] getTotalRevenueSummary() {
+        return reportService.getTotalRevenueSummary();
+    }
+
+    public Object[] getTotalBookingsSummary() {
+        return reportService.getTotalBookingsSummary();
+    }
+
+    public Object[] getActiveCourtsSummary() {
+        return reportService.getActiveCourtsSummary();
+    }
+
+    public Object[] getExpiringPromotionsSummary() {
+        return reportService.getExpiringPromotionsSummary();
+    }
 }
