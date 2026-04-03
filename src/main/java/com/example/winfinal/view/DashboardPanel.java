@@ -21,10 +21,67 @@ public class DashboardPanel extends JPanel {
     }
 
     private void initComponents() {
-        // Header
+        // Header Panel
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(Color.WHITE);
+
         JLabel header = new JLabel("Báo cáo phân tích");
         header.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        add(header, BorderLayout.NORTH);
+        headerPanel.add(header, BorderLayout.WEST);
+
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        actions.setBackground(Color.WHITE);
+
+        JButton refreshBtn = new JButton("Làm mới");
+        refreshBtn.setBackground(new Color(52, 152, 219));
+        refreshBtn.setForeground(Color.WHITE);
+        refreshBtn.setFocusPainted(false);
+        refreshBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        refreshBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        refreshBtn.addActionListener(e -> {
+            refreshBtn.setEnabled(false);
+            refreshBtn.setText("Đang tải...");
+            
+            SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                List<Object[]> d0, d1, d2, d3, d4, d5;
+                Exception ex;
+                @Override
+                protected Void doInBackground() {
+                    try {
+                        d0 = reportController.getMonthlyRevenue();
+                        d1 = reportController.getTopCustomers();
+                        d2 = reportController.getCourtUtilization();
+                        d3 = reportController.getPeakHours();
+                        d4 = reportController.getCancellationRates();
+                        d5 = reportController.getExpiringPromotions();
+                    } catch (Exception err) {
+                        ex = err;
+                    }
+                    return null;
+                }
+                @Override
+                protected void done() {
+                    if (ex != null) {
+                        JOptionPane.showMessageDialog(DashboardPanel.this, "Lỗi tải dữ liệu báo cáo: " + ex.getMessage());
+                    } else if (d0 != null && d1 != null && d2 != null && d3 != null && d4 != null && d5 != null) {
+                        updateTableData(0, d0);
+                        updateTableData(1, d1);
+                        updateTableData(2, d2);
+                        updateTableData(3, d3);
+                        updateTableData(4, d4);
+                        updateTableData(5, d5);
+                    }
+                    refreshBtn.setText("Làm mới");
+                    refreshBtn.setEnabled(true);
+                }
+            };
+            worker.execute();
+        });
+
+        actions.add(refreshBtn);
+        headerPanel.add(actions, BorderLayout.EAST);
+        add(headerPanel, BorderLayout.NORTH);
 
         // Sidebar or TabbedPane for Reports
         reportTabs = new JTabbedPane();

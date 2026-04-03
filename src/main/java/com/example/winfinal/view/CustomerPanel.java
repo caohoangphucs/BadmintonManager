@@ -33,6 +33,7 @@ public class CustomerPanel extends JPanel {
         JButton addBtn = createStyledButton("Thêm khách hàng", new Color(46, 204, 113));
         JButton editBtn = createStyledButton("Sửa", new Color(241, 196, 15));
         JButton delBtn = createStyledButton("Xóa", new Color(231, 76, 60));
+        JButton refreshBtn = createStyledButton("Làm mới", new Color(52, 152, 219));
 
         addBtn.addActionListener(e -> showForm(null));
         editBtn.addActionListener(e -> {
@@ -48,10 +49,12 @@ public class CustomerPanel extends JPanel {
                 }
             }
         });
+        refreshBtn.addActionListener(e -> loadData());
 
         btnPanel.add(addBtn);
         btnPanel.add(editBtn);
         btnPanel.add(delBtn);
+        btnPanel.add(refreshBtn);
         north.add(btnPanel, BorderLayout.EAST);
         add(north, BorderLayout.NORTH);
 
@@ -94,6 +97,7 @@ public class CustomerPanel extends JPanel {
         b.setForeground(Color.WHITE);
         b.setFocusPainted(false);
         b.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return b;
     }
 }

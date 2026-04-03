@@ -8,6 +8,7 @@ public class MainFrame extends JFrame {
     private JPanel sidebar;
     private JPanel contentPanel;
     private CardLayout cardLayout;
+    private java.util.List<JButton> sidebarButtons = new java.util.ArrayList<>();
 
     public MainFrame() {
         setTitle("Quản lý sân cầu lông - Badminton Manager");
@@ -65,6 +66,24 @@ public class MainFrame extends JFrame {
         contentPanel.add(new PromotionPanel(), "PROMOTION");
 
         add(contentPanel, BorderLayout.CENTER);
+
+        if (!sidebarButtons.isEmpty()) {
+            setActiveButton(sidebarButtons.get(0));
+        }
+    }
+
+    private void setActiveButton(JButton activeBtn) {
+        for (JButton btn : sidebarButtons) {
+            if (btn == activeBtn) {
+                btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+                btn.setForeground(Color.WHITE);
+                btn.setBackground(new Color(60, 68, 70));
+            } else {
+                btn.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+                btn.setForeground(Color.LIGHT_GRAY);
+                btn.setBackground(new Color(45, 52, 54));
+            }
+        }
     }
 
     private void addSidebarLabel(String text, Font font, Color color) {
@@ -93,12 +112,22 @@ public class MainFrame extends JFrame {
                 btn.setForeground(Color.WHITE);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setBackground(new Color(45, 52, 54));
-                btn.setForeground(Color.LIGHT_GRAY);
+                if (btn.getFont().isBold()) {
+                    btn.setBackground(new Color(60, 68, 70));
+                    btn.setForeground(Color.WHITE);
+                } else {
+                    btn.setBackground(new Color(45, 52, 54));
+                    btn.setForeground(Color.LIGHT_GRAY);
+                }
             }
         });
 
-        btn.addActionListener(e -> cardLayout.show(contentPanel, cardName));
+        btn.addActionListener(e -> {
+            cardLayout.show(contentPanel, cardName);
+            setActiveButton(btn);
+        });
+
+        sidebarButtons.add(btn);
         sidebar.add(btn);
         sidebar.add(Box.createVerticalStrut(10));
     }
