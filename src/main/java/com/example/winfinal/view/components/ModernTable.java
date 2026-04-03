@@ -24,6 +24,7 @@ public class ModernTable extends JTable {
         setSelectionForeground(Color.WHITE);
         setFont(new Font("Segoe UI", Font.PLAIN, 14));
         setFillsViewportHeight(true);
+        adjustColumnWidths();
 
         // Header Styling
         JTableHeader header = getTableHeader();
@@ -49,6 +50,24 @@ public class ModernTable extends JTable {
                 repaint();
             }
         });
+    }
+
+    @Override
+    public void setModel(javax.swing.table.TableModel dataModel) {
+        super.setModel(dataModel);
+        adjustColumnWidths();
+    }
+
+    private void adjustColumnWidths() {
+        if (getColumnModel() == null) return;
+        for (int i = 0; i < getColumnCount(); i++) {
+            String colName = getColumnName(i).toLowerCase();
+            if (colName.equals("id") || colName.contains("mã id")) {
+                getColumnModel().getColumn(i).setMinWidth(50);
+                getColumnModel().getColumn(i).setMaxWidth(80);
+                getColumnModel().getColumn(i).setPreferredWidth(60);
+            }
+        }
     }
 
     @Override

@@ -70,9 +70,21 @@ public class BookingPanel extends JPanel {
 
     private void loadData() {
         model.setRowCount(0);
-        bookingController.getAll().forEach(b -> model.addRow(new Object[]{
-            b.getBookingId(), b.getCustomerFullName(), b.getCourtName(), b.getBookingDate(), b.getStartTime(), b.getEndTime(), b.getTotalPrice(), b.getStatus()
-        }));
+        java.text.NumberFormat format = java.text.NumberFormat.getInstance(java.util.Locale.forLanguageTag("vi-VN"));
+        bookingController.getAll().forEach(b -> {
+            String priceStr = format.format(b.getTotalPrice());
+            String statusHTML = b.getStatus();
+            if ("Confirmed".equals(statusHTML)) {
+                statusHTML = "<html><font color='#27ae60'><b>Đã xác nhận</b></font></html>";
+            } else if ("Pending".equals(statusHTML)) {
+                statusHTML = "<html><font color='#f39c12'><b>Chờ xác nhận</b></font></html>";
+            } else if ("Cancelled".equals(statusHTML)) {
+                statusHTML = "<html><font color='#c0392b'><b>Đã hủy</b></font></html>";
+            }
+            model.addRow(new Object[]{
+                b.getBookingId(), b.getCustomerFullName(), b.getCourtName(), b.getBookingDate(), b.getStartTime(), b.getEndTime(), priceStr, statusHTML
+            });
+        });
     }
 
     private JButton createButton(String text, Color color) {
