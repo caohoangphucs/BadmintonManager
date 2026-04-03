@@ -137,7 +137,7 @@ public class CustomerPanel extends JPanel {
         JTextField name = new JTextField(customer != null ? customer.getFullName() : "");
         JTextField phone = new JTextField(customer != null ? customer.getPhoneNumber() : "");
         JTextField email = new JTextField(customer != null ? customer.getEmail() : "");
-        JComboBox<String> membership = new JComboBox<>(new String[]{"Thường", "Thân thiết", "VIP"});
+        JComboBox<String> membership = new JComboBox<>(new String[]{"Gold", "Silver", "Regular"});
         if (customer != null) membership.setSelectedItem(customer.getMembershipType());
 
         Object[] fields = {"Họ tên:", name, "Điện thoại:", phone, "Email:", email, "Hạng TV:", membership};

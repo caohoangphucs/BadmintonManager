@@ -21,7 +21,7 @@ import java.util.List;
 public class BookingPanel extends JPanel {
     private final BookingController bookingController;
     private final CustomerController customerController;
-    private final CourtController    courtController;
+    private final CourtController courtController;
     private JTable table;
     private DefaultTableModel model;
 
@@ -29,9 +29,9 @@ public class BookingPanel extends JPanel {
     private JComboBox<String> statusCombo;
 
     public BookingPanel() {
-        this.bookingController  = new BookingController();
+        this.bookingController = new BookingController();
         this.customerController = new CustomerController();
-        this.courtController    = new CourtController();
+        this.courtController = new CourtController();
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setBackground(Color.WHITE);
@@ -85,7 +85,8 @@ public class BookingPanel extends JPanel {
             if (r == -1) {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn lượt đặt sân cần hủy.");
             } else {
-                if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn hủy lượt đặt sân này?", "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn hủy lượt đặt sân này?", "Xác nhận",
+                        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                     try {
                         bookingController.cancelBooking((Integer) table.getValueAt(r, 0));
                         JOptionPane.showMessageDialog(this, "Hủy đặt sân thành công.");
@@ -124,9 +125,8 @@ public class BookingPanel extends JPanel {
         JPanel filterCard = new JPanel(new GridBagLayout());
         filterCard.setBackground(new Color(248, 249, 252));
         filterCard.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-            BorderFactory.createEmptyBorder(10, 16, 10, 16)
-        ));
+                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
+                BorderFactory.createEmptyBorder(10, 16, 10, 16)));
 
         GridBagConstraints gc = new GridBagConstraints();
         gc.insets = new Insets(0, 0, 0, 10);
@@ -135,44 +135,52 @@ public class BookingPanel extends JPanel {
         gc.gridy = 0;
 
         // --- Sân label ---
-        gc.gridx = 0; gc.weightx = 0;
+        gc.gridx = 0;
+        gc.weightx = 0;
         filterCard.add(makeFilterLabel("Sân:"), gc);
 
         // --- Sân combo ---
-        courtCombo = new JComboBox<>(new String[]{"Tất cả"});
+        courtCombo = new JComboBox<>(new String[] { "Tất cả" });
         styleCombo(courtCombo, 160);
         gc.gridx = 1;
         filterCard.add(courtCombo, gc);
 
         // --- separator gap ---
-        gc.gridx = 2; gc.insets = new Insets(0, 6, 0, 10);
+        gc.gridx = 2;
+        gc.insets = new Insets(0, 6, 0, 10);
         filterCard.add(Box.createHorizontalStrut(6), gc);
         gc.insets = new Insets(0, 0, 0, 10);
 
         // --- Trạng thái label ---
-        gc.gridx = 3; gc.weightx = 0;
+        gc.gridx = 3;
+        gc.weightx = 0;
         filterCard.add(makeFilterLabel("Trạng thái:"), gc);
 
         // --- Trạng thái combo ---
-        statusCombo = new JComboBox<>(new String[]{"Tất cả", "Đã xác nhận", "Chờ xác nhận", "Đã hủy"});
+        statusCombo = new JComboBox<>(new String[] { "Tất cả", "Đã xác nhận", "Chờ xác nhận", "Đã hủy" });
         styleCombo(statusCombo, 170);
         gc.gridx = 4;
         filterCard.add(statusCombo, gc);
 
         // --- spacer pushes buttons to the right ---
-        gc.gridx = 5; gc.weightx = 1.0; gc.fill = GridBagConstraints.HORIZONTAL;
+        gc.gridx = 5;
+        gc.weightx = 1.0;
+        gc.fill = GridBagConstraints.HORIZONTAL;
         filterCard.add(Box.createHorizontalGlue(), gc);
-        gc.fill = GridBagConstraints.NONE; gc.weightx = 0;
+        gc.fill = GridBagConstraints.NONE;
+        gc.weightx = 0;
 
         // --- Lọc (primary) ---
         JButton filterBtn = createButton("Lọc", new Color(55, 93, 169));
         filterBtn.setPreferredSize(new Dimension(100, 34));
-        gc.gridx = 6; gc.insets = new Insets(0, 0, 0, 8);
+        gc.gridx = 6;
+        gc.insets = new Insets(0, 0, 0, 8);
         filterCard.add(filterBtn, gc);
 
         // --- Xóa lọc (ghost / secondary) ---
         JButton clearBtn = new GhostButton("Xóa lọc");
-        gc.gridx = 7; gc.insets = new Insets(0, 0, 0, 0);
+        gc.gridx = 7;
+        gc.insets = new Insets(0, 0, 0, 0);
         filterCard.add(clearBtn, gc);
 
         filterBtn.addActionListener(e -> loadData());
@@ -185,7 +193,8 @@ public class BookingPanel extends JPanel {
         northWrapper.add(filterCard, BorderLayout.SOUTH);
         add(northWrapper, BorderLayout.NORTH);
 
-        model = new DefaultTableModel(new String[]{"ID", "Khách hàng", "Sân", "Ngày đặt", "Bắt đầu", "Kết thúc", "Giá tiền (VND)", "Trạng thái"}, 0);
+        model = new DefaultTableModel(new String[] { "ID", "Khách hàng", "Sân", "Ngày đặt", "Bắt đầu", "Kết thúc",
+                "Giá tiền (VND)", "Trạng thái" }, 0);
         table = new com.example.winfinal.view.components.ModernTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
@@ -209,29 +218,34 @@ public class BookingPanel extends JPanel {
         }
 
         data.stream()
-            .filter(b -> "Tất cả".equals(selectedCourt) || b.getCourtName().equals(selectedCourt))
-            .filter(b -> {
-                if ("Tất cả".equals(selectedStatus)) return true;
-                String st = b.getStatus();
-                if ("Đã xác nhận".equals(selectedStatus)) return "Confirmed".equals(st);
-                if ("Chờ xác nhận".equals(selectedStatus)) return "Pending".equals(st);
-                if ("Đã hủy".equals(selectedStatus)) return "Cancelled".equals(st);
-                return true;
-            })
-            .forEach(b -> {
-                String priceStr = com.example.winfinal.utils.FormatUtils.formatCurrency(b.getTotalPrice());
-                String statusHTML = b.getStatus();
-                if ("Confirmed".equals(statusHTML)) {
-                    statusHTML = "<html><font color='#27ae60'><b>Đã xác nhận</b></font></html>";
-                } else if ("Pending".equals(statusHTML)) {
-                    statusHTML = "<html><font color='#f39c12'><b>Chờ xác nhận</b></font></html>";
-                } else if ("Cancelled".equals(statusHTML)) {
-                    statusHTML = "<html><font color='#c0392b'><b>Đã hủy</b></font></html>";
-                }
-                model.addRow(new Object[]{
-                    b.getBookingId(), b.getCustomerFullName(), b.getCourtName(), b.getBookingDate(), b.getStartTime(), b.getEndTime(), priceStr, statusHTML
+                .filter(b -> "Tất cả".equals(selectedCourt) || b.getCourtName().equals(selectedCourt))
+                .filter(b -> {
+                    if ("Tất cả".equals(selectedStatus))
+                        return true;
+                    String st = b.getStatus();
+                    if ("Đã xác nhận".equals(selectedStatus))
+                        return "Confirmed".equals(st);
+                    if ("Chờ xác nhận".equals(selectedStatus))
+                        return "Pending".equals(st);
+                    if ("Đã hủy".equals(selectedStatus))
+                        return "Cancelled".equals(st);
+                    return true;
+                })
+                .forEach(b -> {
+                    String priceStr = com.example.winfinal.utils.FormatUtils.formatCurrency(b.getTotalPrice());
+                    String statusHTML = b.getStatus();
+                    if ("Confirmed".equals(statusHTML)) {
+                        statusHTML = "<html><font color='#27ae60'><b>Đã xác nhận</b></font></html>";
+                    } else if ("Pending".equals(statusHTML)) {
+                        statusHTML = "<html><font color='#f39c12'><b>Chờ xác nhận</b></font></html>";
+                    } else if ("Cancelled".equals(statusHTML)) {
+                        statusHTML = "<html><font color='#c0392b'><b>Đã hủy</b></font></html>";
+                    }
+                    model.addRow(new Object[] {
+                            b.getBookingId(), b.getCustomerFullName(), b.getCourtName(), b.getBookingDate(),
+                            b.getStartTime(), b.getEndTime(), priceStr, statusHTML
+                    });
                 });
-            });
     }
 
     private JButton createButton(String text, Color color) {
@@ -253,14 +267,14 @@ public class BookingPanel extends JPanel {
         combo.setBackground(Color.WHITE);
         combo.setForeground(new Color(30, 41, 59));
         combo.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(203, 213, 225), 1, true),
-            BorderFactory.createEmptyBorder(2, 6, 2, 4)
-        ));
+                BorderFactory.createLineBorder(new Color(203, 213, 225), 1, true),
+                BorderFactory.createEmptyBorder(2, 6, 2, 4)));
     }
 
     // ── Ghost (outline) button for secondary filter action ────────────────────
     private static class GhostButton extends JButton {
         private boolean hovered = false;
+
         GhostButton(String text) {
             super(text);
             setPreferredSize(new Dimension(100, 34));
@@ -272,16 +286,26 @@ public class BookingPanel extends JPanel {
             setOpaque(false);
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             addMouseListener(new MouseAdapter() {
-                @Override public void mouseEntered(MouseEvent e) { hovered = true;  repaint(); }
-                @Override public void mouseExited(MouseEvent e)  { hovered = false; repaint(); }
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    hovered = true;
+                    repaint();
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    hovered = false;
+                    repaint();
+                }
             });
         }
+
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             Color borderCol = hovered ? new Color(100, 116, 139) : new Color(203, 213, 225);
-            Color fillCol   = hovered ? new Color(241, 245, 249) : new Color(248, 249, 252);
+            Color fillCol = hovered ? new Color(241, 245, 249) : new Color(248, 249, 252);
             g2.setColor(fillCol);
             g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 8, 8));
             g2.setColor(borderCol);
@@ -293,14 +317,15 @@ public class BookingPanel extends JPanel {
     }
 
     private void showBookCourtDialog() {
-        // ── 1. Load fresh data from DB (courts required; customers used for save-time ID lookup) ─
+        // ── 1. Load fresh data from DB (courts required; customers used for save-time
+        // ID lookup) ─
         List<CustomerDTO> customers = customerController.getAll();
-        List<CourtDTO>    courts    = courtController.getAllCourts();
+        List<CourtDTO> courts = courtController.getAllCourts();
 
         if (courts.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                "Chưa có sân nào trong hệ thống. Vui lòng thêm sân trước.",
-                "Thông báo", JOptionPane.WARNING_MESSAGE);
+                    "Chưa có sân nào trong hệ thống. Vui lòng thêm sân trước.",
+                    "Thông báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -318,7 +343,7 @@ public class BookingPanel extends JPanel {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof CourtDTO ct) {
                     setText(ct.getCourtName() + " — "
-                        + com.example.winfinal.utils.FormatUtils.formatCurrency(ct.getPricePerHour()) + " ₫/giờ");
+                            + com.example.winfinal.utils.FormatUtils.formatCurrency(ct.getPricePerHour()) + " ₫/giờ");
                 }
                 return this;
             }
@@ -354,17 +379,22 @@ public class BookingPanel extends JPanel {
         Runnable recalcPrice = () -> {
             try {
                 CourtDTO sel = (CourtDTO) courtDialogCombo.getSelectedItem();
-                if (sel == null || sel.getPricePerHour() == null) return;
+                if (sel == null || sel.getPricePerHour() == null)
+                    return;
                 LocalTime st = LocalTime.parse((String) startCombo.getSelectedItem());
                 LocalTime et = LocalTime.parse((String) endCombo.getSelectedItem());
-                if (!et.isAfter(st)) { priceField.setText("—"); return; }
+                if (!et.isAfter(st)) {
+                    priceField.setText("—");
+                    return;
+                }
                 long minutes = java.time.Duration.between(st, et).toMinutes();
                 BigDecimal bookedHours = BigDecimal.valueOf(minutes)
                         .divide(BigDecimal.valueOf(60), 4, RoundingMode.HALF_UP);
                 BigDecimal total = sel.getPricePerHour()
                         .multiply(bookedHours).setScale(0, RoundingMode.HALF_UP);
                 priceField.setText(com.example.winfinal.utils.FormatUtils.formatCurrency(total) + " ₫");
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         };
 
         courtDialogCombo.addActionListener(e -> recalcPrice.run());
@@ -374,45 +404,48 @@ public class BookingPanel extends JPanel {
 
         // ── 8. Assemble dialog ────────────────────────────────────────────────────
         Object[] fields = {
-            "Tên khách hàng:",        customerNameField,
-            "Tên sân:",               courtDialogCombo,
-            "Ngày đặt (YYYY-MM-DD):", dateField,
-            "Bắt đầu:",               startCombo,
-            "Kết thúc:",              endCombo,
-            "Giá tiền (VND):",        priceField
+                "Tên khách hàng:", customerNameField,
+                "Tên sân:", courtDialogCombo,
+                "Ngày đặt (YYYY-MM-DD):", dateField,
+                "Bắt đầu:", startCombo,
+                "Kết thúc:", endCombo,
+                "Giá tiền (VND):", priceField
         };
 
         if (JOptionPane.showConfirmDialog(this, fields, "Đặt sân mới",
                 JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
             try {
-                // \u2500\u2500 Resolve or create customer \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+                // \u2500\u2500 Resolve or create customer
+                // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
                 String typedName = customerNameField.getText().trim();
                 if (typedName.isEmpty()) {
                     JOptionPane.showMessageDialog(this,
-                        "Vui l\u00f2ng nh\u1eadp t\u00ean kh\u00e1ch h\u00e0ng.", "Thi\u1ebfu th\u00f4ng tin", JOptionPane.WARNING_MESSAGE);
+                            "Vui l\u00f2ng nh\u1eadp t\u00ean kh\u00e1ch h\u00e0ng.", "Thi\u1ebfu th\u00f4ng tin",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
                 // Try to find an existing customer with this exact name (case-insensitive)
                 Integer resolvedCustomerId = customers.stream()
-                    .filter(c -> c.getFullName().equalsIgnoreCase(typedName))
-                    .map(CustomerDTO::getCustomerId)
-                    .findFirst().orElse(null);
+                        .filter(c -> c.getFullName().equalsIgnoreCase(typedName))
+                        .map(CustomerDTO::getCustomerId)
+                        .findFirst().orElse(null);
 
                 if (resolvedCustomerId == null) {
-                    // Name not found \u2014 create a new customer record; DB generates the ID (IDENTITY strategy)
+                    // Name not found \u2014 create a new customer record; DB generates the ID
+                    // (IDENTITY strategy)
                     customerController.create(CustomerDTO.builder()
-                        .fullName(typedName)
-                        .membershipType("Standard")
-                        .build());
+                            .fullName(typedName)
+                            .membershipType("Standard")
+                            .build());
 
                     // Re-fetch the full list to locate the newly inserted ID
                     resolvedCustomerId = customerController.getAll().stream()
-                        .filter(c -> c.getFullName().equalsIgnoreCase(typedName))
-                        .map(CustomerDTO::getCustomerId)
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException(
-                            "T\u1ea1o kh\u00e1ch h\u00e0ng m\u1edbi th\u1ea5t b\u1ea1i. Vui l\u00f2ng th\u1eed l\u1ea1i."));
+                            .filter(c -> c.getFullName().equalsIgnoreCase(typedName))
+                            .map(CustomerDTO::getCustomerId)
+                            .findFirst()
+                            .orElseThrow(() -> new RuntimeException(
+                                    "T\u1ea1o kh\u00e1ch h\u00e0ng m\u1edbi th\u1ea5t b\u1ea1i. Vui l\u00f2ng th\u1eed l\u1ea1i."));
                 }
 
                 CourtDTO chosenCourt = (CourtDTO) courtDialogCombo.getSelectedItem();
@@ -423,8 +456,8 @@ public class BookingPanel extends JPanel {
                 // Validate time range before saving
                 if (!et.isAfter(st)) {
                     JOptionPane.showMessageDialog(this,
-                        "Gi\u1edd k\u1ebft th\u00fac ph\u1ea3i sau gi\u1edd b\u1eaft \u0111\u1ea7u.\nVui l\u00f2ng ch\u1ecdn l\u1ea1i.",
-                        "Th\u1eddi gian kh\u00f4ng h\u1ee3p l\u1ec7", JOptionPane.WARNING_MESSAGE);
+                            "Gi\u1edd k\u1ebft th\u00fac ph\u1ea3i sau gi\u1edd b\u1eaft \u0111\u1ea7u.\nVui l\u00f2ng ch\u1ecdn l\u1ea1i.",
+                            "Th\u1eddi gian kh\u00f4ng h\u1ee3p l\u1ec7", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -436,20 +469,20 @@ public class BookingPanel extends JPanel {
                         .multiply(bookedHours).setScale(0, RoundingMode.HALF_UP);
 
                 BookingDTO dto = BookingDTO.builder()
-                    .customerId(resolvedCustomerId)
-                    .customerFullName(typedName)
-                    .courtId(chosenCourt.getCourtId())
-                    .bookingDate(LocalDate.parse(dateField.getText().trim()))
-                    .startTime(st)
-                    .endTime(et)
-                    .totalPrice(totalPrice)
-                    .status("Confirmed")
-                    .build();
+                        .customerId(resolvedCustomerId)
+                        .customerFullName(typedName)
+                        .courtId(chosenCourt.getCourtId())
+                        .bookingDate(LocalDate.parse(dateField.getText().trim()))
+                        .startTime(st)
+                        .endTime(et)
+                        .totalPrice(totalPrice)
+                        .status("Confirmed")
+                        .build();
                 bookingController.createBooking(dto);
                 loadData();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Lỗi nhập liệu: " + ex.getMessage(),
-                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

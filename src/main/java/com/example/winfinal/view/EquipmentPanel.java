@@ -104,11 +104,11 @@ public class EquipmentPanel extends JPanel {
         List<EquipmentDTO> items = equipmentController.getAll();
         for (EquipmentDTO item : items) {
             String condHTML = item.getCondition();
-            if ("New".equalsIgnoreCase(condHTML)) {
+            if ("New".equalsIgnoreCase(condHTML) || "Mới".equalsIgnoreCase(condHTML)) {
                 condHTML = "<html><font color='#27ae60'><b>Mới</b></font></html>";
-            } else if ("Excellent".equalsIgnoreCase(condHTML)) {
+            } else if ("Excellent".equalsIgnoreCase(condHTML) || "Rất tốt".equalsIgnoreCase(condHTML)) {
                 condHTML = "<html><font color='#2980b9'><b>Rất tốt</b></font></html>";
-            } else if ("Good".equalsIgnoreCase(condHTML)) {
+            } else if ("Good".equalsIgnoreCase(condHTML) || "Tốt".equalsIgnoreCase(condHTML)) {
                 condHTML = "<html><font color='#e67e22'><b>Tốt</b></font></html>";
             }
             tableModel.addRow(new Object[]{
@@ -124,7 +124,8 @@ public class EquipmentPanel extends JPanel {
     private void showAddDialog() {
         JTextField name = new JTextField();
         JTextField qty = new JTextField();
-        JTextField cond = new JTextField("Good");
+        JComboBox<String> cond = new JComboBox<>(new String[]{"Mới", "Rất tốt", "Tốt"});
+        cond.setSelectedItem("Mới");
         JTextField price = new JTextField();
 
         Object[] message = { 
@@ -139,7 +140,7 @@ public class EquipmentPanel extends JPanel {
                 equipmentController.add(EquipmentDTO.builder()
                     .equipmentName(name.getText())
                     .quantity(Integer.parseInt(qty.getText()))
-                    .condition(cond.getText())
+                    .condition((String) cond.getSelectedItem())
                     .price(new BigDecimal(price.getText()))
                     .build());
                 loadData();
@@ -160,7 +161,14 @@ public class EquipmentPanel extends JPanel {
 
         JTextField name = new JTextField(current.getEquipmentName());
         JTextField qty = new JTextField(current.getQuantity().toString());
-        JTextField cond = new JTextField(current.getCondition());
+        
+        JComboBox<String> cond = new JComboBox<>(new String[]{"Mới", "Rất tốt", "Tốt"});
+        String currentCondition = current.getCondition();
+        if ("New".equalsIgnoreCase(currentCondition)) currentCondition = "Mới";
+        if ("Excellent".equalsIgnoreCase(currentCondition)) currentCondition = "Rất tốt";
+        if ("Good".equalsIgnoreCase(currentCondition)) currentCondition = "Tốt";
+        cond.setSelectedItem(currentCondition);
+        
         JTextField price = new JTextField(current.getPrice().toString());
 
         Object[] message = { 
@@ -174,7 +182,7 @@ public class EquipmentPanel extends JPanel {
             try {
                 current.setEquipmentName(name.getText());
                 current.setQuantity(Integer.parseInt(qty.getText()));
-                current.setCondition(cond.getText());
+                current.setCondition((String) cond.getSelectedItem());
                 current.setPrice(new BigDecimal(price.getText()));
                 equipmentController.update(current);
                 loadData();

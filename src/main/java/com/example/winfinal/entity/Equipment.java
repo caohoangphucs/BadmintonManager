@@ -22,7 +22,7 @@ public class Equipment {
 
     private Integer quantity;
 
-    @Column(name = "condition", length = 20)
+    @Column(name = "`condition`", length = 20)
     private String condition;
 
     @Column(precision = 10, scale = 2)
